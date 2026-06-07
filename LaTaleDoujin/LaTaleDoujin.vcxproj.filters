@@ -24,12 +24,18 @@
     <ClCompile Include="SysTimer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LaTaleDoujin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11Application.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SysTimer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LaTaleDoujin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

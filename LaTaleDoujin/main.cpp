@@ -1,4 +1,4 @@
-#include "D3D11Application.h"
+#include "LaTaleDoujin.h"
 #include <crtdbg.h>
 
 #if defined(_DEBUG)
@@ -8,10 +8,10 @@ int main() {
 int WINAPI WinMain() {
 #endif
 
-	D3D11Application d3d11App(L"La Tale Doujin", 1360, 768);
+	LaTaleDoujin latale;
 
-	if (!d3d11App.Init())
+	if (!latale.Init())
 		return -1;
 
-	return d3d11App.Run();
+	return latale.Run();
 }

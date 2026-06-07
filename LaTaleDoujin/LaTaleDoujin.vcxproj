@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="D3D11Application.cpp" />
+    <ClCompile Include="LaTaleDoujin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SysTimer.cpp" />
   </ItemGroup>
@@ -142,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11Application.h" />
+    <ClInclude Include="LaTaleDoujin.h" />
     <ClInclude Include="SysTimer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

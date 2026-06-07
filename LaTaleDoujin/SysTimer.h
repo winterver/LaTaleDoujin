@@ -5,6 +5,7 @@ class SysTimer
 {
 public:
     SysTimer();
+    ~SysTimer();
 
     float DeltaTime();
     UINT64 GetTime();

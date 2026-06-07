@@ -7,6 +7,11 @@ SysTimer::SysTimer()
     SetFramerate(60);
 }
 
+SysTimer::~SysTimer()
+{
+    CloseHandle(m_Timer);
+}
+
 float SysTimer::DeltaTime()
 {
     return m_DeltaTime;
@@ -47,7 +52,7 @@ void SysTimer::Tick()
         UINT64 remaining = 0;
         UINT64 now = GetTime();
 
-        if (m_TotalTime > now)
+        if (now < m_TotalTime)
             remaining = m_TotalTime - now;
 
         if (remaining <= 2000000) {
@@ -65,7 +70,7 @@ void SysTimer::Tick()
             WaitForSingleObject(m_Timer, INFINITE);
     }
 
-    INT64 now = GetTime();
+    UINT64 now = GetTime();
     m_DeltaTime = float((now - m_LastTime) / 1e9);
     m_LastTime = now;
 }

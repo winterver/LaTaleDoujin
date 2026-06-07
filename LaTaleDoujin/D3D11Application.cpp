@@ -1,5 +1,7 @@
 #include "D3D11Application.h"
 #include <cassert>
+#include <iostream>
+#include "LaTaleDoujin.h"
 
 extern "C"
 {
@@ -59,10 +61,6 @@ void D3D11Application::OnResize()
     assert(m_pDevice);
     assert(m_pSwapChain);
 
-    m_pRenderTargetView.Reset();
-    m_pDepthStencilView.Reset();
-    m_pDepthStencilBuffer.Reset();
-
     ComPtr<ID3D11Texture2D> backBuffer;
     m_pSwapChain->ResizeBuffers(1, m_Width, m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
     m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
@@ -94,7 +92,9 @@ void D3D11Application::OnResize()
 
     m_pDevice->CreateTexture2D(&depthStencilDesc, nullptr, &m_pDepthStencilBuffer);
     m_pDevice->CreateDepthStencilView(m_pDepthStencilBuffer.Get(), nullptr, &m_pDepthStencilView);
-    m_pContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView.Get());
+
+    // ComPtr::operator& => reference_count--, equivalent to ComPtr::ReleaseAndGetAddressOf
+    m_pContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
 
     m_Viewport.TopLeftX = 0;
     m_Viewport.TopLeftY = 0;
@@ -138,12 +138,10 @@ LRESULT D3D11Application::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
         if (LOWORD(wParam) == WA_INACTIVE)
         {
             m_AppPaused = true;
-            //m_Timer.Stop();
         }
         else
         {
             m_AppPaused = false;
-            //m_Timer.Start();
         }
         return 0;
 
@@ -201,13 +199,11 @@ LRESULT D3D11Application::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
     case WM_ENTERSIZEMOVE:
         m_AppPaused = true;
         m_Resizing = true;
-        //m_Timer.Stop();
         return 0;
 
     case WM_EXITSIZEMOVE:
         m_AppPaused = false;
         m_Resizing = false;
-        //m_Timer.Start();
         OnResize();
         return 0;
 
