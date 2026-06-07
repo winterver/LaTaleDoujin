@@ -17,7 +17,10 @@ D3D11Application::D3D11Application(const TCHAR* title, int width, int height)
 {
 }
 
-D3D11Application::~D3D11Application() = default;
+D3D11Application::~D3D11Application()
+{
+    m_pContext->ClearState();
+}
 
 bool D3D11Application::Init()
 {
@@ -60,6 +63,10 @@ void D3D11Application::OnResize()
     assert(m_pContext);
     assert(m_pDevice);
     assert(m_pSwapChain);
+
+    m_pRenderTargetView.Reset();
+    m_pDepthStencilBuffer.Reset();
+    m_pDepthStencilView.Reset();
 
     ComPtr<ID3D11Texture2D> backBuffer;
     m_pSwapChain->ResizeBuffers(1, m_Width, m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);

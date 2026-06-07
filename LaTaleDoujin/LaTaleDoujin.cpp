@@ -36,7 +36,6 @@ void LaTaleDoujin::DrawScene()
     m_pContext->ClearRenderTargetView(m_pRenderTargetView.Get(), cornflowerblue);
     m_pContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
-    m_SpriteBatch->SetViewport(m_Viewport);
     m_SpriteBatch->Begin();
     m_SpriteBatch->Draw(m_IrisTexture.Get(), XMFLOAT2());
     m_SpriteBatch->End();
