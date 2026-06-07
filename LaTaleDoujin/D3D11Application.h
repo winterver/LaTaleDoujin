@@ -4,8 +4,7 @@
 #include <wrl/client.h>
 #include "SysTimer.h"
 
-template <class T>
-using ComPtr = Microsoft::WRL::ComPtr<T>;
+using Microsoft::WRL::ComPtr;
 
 class D3D11Application
 {
@@ -45,7 +44,7 @@ protected:
     ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
     ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
     ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
-    D3D11_VIEWPORT m_Viewport = { 0 };
+    D3D11_VIEWPORT m_Viewport = { };
 
     const TCHAR* m_Title;
     int m_Width;

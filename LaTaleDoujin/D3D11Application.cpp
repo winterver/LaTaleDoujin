@@ -26,7 +26,7 @@ bool D3D11Application::Init()
 
 int D3D11Application::Run()
 {
-    MSG msg = { 0 };
+    MSG msg = { };
     m_Timer.Reset();
 
     while (msg.message != WM_QUIT)
@@ -242,7 +242,7 @@ LRESULT D3D11Application::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 bool D3D11Application::InitWindow()
 {
-    WNDCLASS wc = { 0 };
+    WNDCLASS wc = { };
     wc.style = CS_HREDRAW | CS_VREDRAW;
     wc.hInstance = GetModuleHandle(NULL);
     wc.lpszClassName = L"D3D11Application";
@@ -334,7 +334,7 @@ bool D3D11Application::InitDirect3D()
     dxgiFactory1.As(&dxgiFactory2);
     if (dxgiFactory2)
     {
-        DXGI_SWAP_CHAIN_DESC1 swapchainDesc = { 0 };
+        DXGI_SWAP_CHAIN_DESC1 swapchainDesc = { };
 
         swapchainDesc.Width = m_Width;
         swapchainDesc.Height = m_Height;
@@ -370,7 +370,7 @@ bool D3D11Application::InitDirect3D()
     }
     else
     {
-        DXGI_SWAP_CHAIN_DESC swapchainDesc = { 0 };
+        DXGI_SWAP_CHAIN_DESC swapchainDesc = { };
 
         swapchainDesc.BufferDesc.Width = m_Width;
         swapchainDesc.BufferDesc.Height = m_Height;
