@@ -135,6 +135,7 @@
     <ClCompile Include="LaTaleDoujin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="SysTimer.cpp" />
+    <ClCompile Include="WICImageLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectXTK-may2026\DirectXTK_Desktop_2022.vcxproj">
@@ -143,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11Application.h" />
+    <ClInclude Include="DXHelper.h" />
     <ClInclude Include="LaTaleDoujin.h" />
     <ClInclude Include="SysTimer.h" />
   </ItemGroup>
