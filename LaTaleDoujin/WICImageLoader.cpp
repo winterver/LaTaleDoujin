@@ -2,7 +2,7 @@
 #include <wrl/client.h>
 #include <d3d11_1.h>
 #include <memory>
-#include "DXHelper.h"
+#include "Helper.h"
 
 using Microsoft::WRL::ComPtr;
 

@@ -8,7 +8,7 @@ public:
     ~SysTimer();
 
     float DeltaTime();
-    UINT64 GetTime();
+    INT64 GetTime();
 
     void SetFramerate(int framerate);
     void Reset();
@@ -16,9 +16,9 @@ public:
 
 private:
     HANDLE m_Timer;
-    UINT64 m_TotalTime = 0;
-    UINT64 m_LastTime = 0;
-    UINT64 m_Interval = 0;
+    INT64 m_TotalTime = 0;
+    INT64 m_LastTime = 0;
+    INT64 m_Interval = 0;
     float m_DeltaTime = 0;
 };
 

@@ -41,7 +41,7 @@
     <ClInclude Include="LaTaleDoujin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DXHelper.h">
+    <ClInclude Include="Helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

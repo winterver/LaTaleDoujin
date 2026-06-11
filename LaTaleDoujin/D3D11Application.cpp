@@ -1,7 +1,6 @@
 #include "D3D11Application.h"
 #include <cassert>
 #include <iostream>
-#include "LaTaleDoujin.h"
 
 extern "C"
 {

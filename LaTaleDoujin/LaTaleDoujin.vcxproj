@@ -144,7 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="D3D11Application.h" />
-    <ClInclude Include="DXHelper.h" />
+    <ClInclude Include="Helper.h" />
     <ClInclude Include="LaTaleDoujin.h" />
     <ClInclude Include="SysTimer.h" />
   </ItemGroup>

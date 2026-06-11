@@ -17,7 +17,7 @@ float SysTimer::DeltaTime()
     return m_DeltaTime;
 }
 
-UINT64 SysTimer::GetTime()
+INT64 SysTimer::GetTime()
 {
     LARGE_INTEGER counter;
     LARGE_INTEGER frequency;
@@ -25,13 +25,13 @@ UINT64 SysTimer::GetTime()
     QueryPerformanceCounter(&counter);
     QueryPerformanceFrequency(&frequency);
 
-    return counter.QuadPart * (UINT64(1e9) / frequency.QuadPart);
+    return counter.QuadPart * (INT64(1e9) / frequency.QuadPart);
 }
 
 void SysTimer::SetFramerate(int framerate)
 {
     if (framerate > 0)
-        m_Interval = __int64(1e9) / framerate;
+        m_Interval = INT64(1e9) / framerate;
     else
         m_Interval = 0;
 
@@ -47,13 +47,10 @@ void SysTimer::Reset()
 void SysTimer::Tick()
 {
     m_TotalTime += m_Interval;
+
     while (true)
     {
-        UINT64 remaining = 0;
-        UINT64 now = GetTime();
-
-        if (now < m_TotalTime)
-            remaining = m_TotalTime - now;
+        INT64 remaining = m_TotalTime - GetTime();
 
         if (remaining <= 2000000) {
             while (GetTime() < m_TotalTime)
@@ -70,7 +67,7 @@ void SysTimer::Tick()
             WaitForSingleObject(m_Timer, INFINITE);
     }
 
-    UINT64 now = GetTime();
+    INT64 now = GetTime();
     m_DeltaTime = float((now - m_LastTime) / 1e9);
     m_LastTime = now;
 }

@@ -1,5 +1,5 @@
 #include "LaTaleDoujin.h"
-#include "DXHelper.h"
+#include "Helper.h"
 
 void CreateTextureFromFile(
     ID3D11Device* pDevice,
