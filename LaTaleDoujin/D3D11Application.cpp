@@ -283,7 +283,7 @@ bool D3D11Application::InitWindow()
 bool D3D11Application::InitDirect3D()
 {
     HRESULT hr;
-    UINT createDeviceFlags;
+    UINT createDeviceFlags = 0;
 
 #if defined(_DEBUG)  
     createDeviceFlags = D3D11_CREATE_DEVICE_DEBUG;

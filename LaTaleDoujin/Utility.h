@@ -10,6 +10,8 @@
 //*********************************************************
 
 #pragma once
+#include <Windows.h>
+#include <d3d11_1.h>
 #include <stdexcept>
 
 inline std::string HrToString(HRESULT hr)
@@ -38,22 +40,10 @@ inline void ThrowIfFailed(HRESULT hr)
     }
 }
 
-// Resets all elements in a ComPtr array.
-template<class T>
-void ResetComPtrArray(T* comPtrArray)
-{
-    for (auto& i : *comPtrArray)
-    {
-        i.Reset();
-    }
-}
+void CreateTextureFromFile(
+    ID3D11Device* pDevice,
+    _In_opt_ ID3D11DeviceContext* pContext,
+    const WCHAR* szFileName,
+    _Outptr_ ID3D11ShaderResourceView** textureView);
 
-// Resets all elements in a unique_ptr array.
-template<class T>
-void ResetUniquePtrArray(T* uniquePtrArray)
-{
-    for (auto& i : *uniquePtrArray)
-    {
-        i.reset();
-    }
-}
+void LoadDataFromResource(LPVOID& ptr, SIZE_T& length, LPCWSTR lpName, LPCWSTR lpType);

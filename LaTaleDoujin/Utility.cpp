@@ -1,8 +1,7 @@
+#include "Utility.h"
 #include <wincodec.h>
 #include <wrl/client.h>
-#include <d3d11_1.h>
 #include <memory>
-#include "Helper.h"
 
 using Microsoft::WRL::ComPtr;
 
@@ -89,4 +88,19 @@ void CreateTextureFromFile(
         pContext->UpdateSubresource(texture.Get(), 0, nullptr, data.get(), stride, size);
         pContext->GenerateMips(*textureView);
     }
+}
+
+void LoadDataFromResource(LPVOID& ptr, SIZE_T& length, LPCWSTR lpName, LPCWSTR lpType)
+{
+    ptr = nullptr;
+    length = 0;
+
+    HRSRC info = FindResource(NULL, lpName, lpType);
+    if (!info) return;
+
+    HGLOBAL res = LoadResource(NULL, info);
+    if (!res) return;
+
+    ptr = LockResource(res);
+    length = SizeofResource(NULL, info);
 }
