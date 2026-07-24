@@ -1,32 +1,16 @@
-#include "LaTaleDoujin.h"
+﻿#include "LaTaleDoujin.h"
 #include "Utility.h"
 #include <SimpleMath.h>
+#include <SpriteBatch.h>
+#include <PrimitiveBatch.h>
+#include <VertexTypes.h>
+#include <Keyboard.h>
+#include <Mouse.h>
+#include <Effects.h>
+#include <CommonStates.h>
 
-using namespace DirectX;
 using namespace DirectX::SimpleMath;
-
-struct VS_BLOOM_PARAMETERS
-{
-    float bloomThreshold;
-    float blurAmount;
-    float bloomIntensity;
-    float baseIntensity;
-    float bloomSaturation;
-    float baseSaturation;
-    uint8_t na[8];
-};
-
-static const VS_BLOOM_PARAMETERS bloomPresets[] =
-{
-    //Thresh  Blur Bloom  Base  BloomSat BaseSat
-    { 0.25f,  4,   1.25f, 1,    1,       1 }, // Default
-    { 0,      3,   1,     1,    1,       1 }, // Soft
-    { 0.5f,   8,   2,     1,    0,       1 }, // Desaturated
-    { 0.25f,  4,   2,     1,    2,       0 }, // Saturated
-    { 0,      2,   1,     0.1f, 1,       1 }, // Blurry
-    { 0.5f,   2,   1,     1,    1,       1 }, // Subtle
-    { 0.25f,  4,   1.25f, 1,    1,       1 }, // None
-};
+using namespace DirectX;
 
 struct VS_BLUR_PARAMETERS
 {
@@ -99,6 +83,10 @@ bool LaTaleDoujin::Init()
     bool val = D3D11Application::Init();
     if (!val) return false;
 
+    m_Keyboard = std::make_unique<Keyboard>();
+    m_Mouse = std::make_unique<Mouse>();
+    m_Mouse->SetWindow(m_hWnd);
+
     m_SpriteBatch = std::make_unique<SpriteBatch>(m_pContext.Get());
 
     LPVOID bytecode;
@@ -123,7 +111,26 @@ bool LaTaleDoujin::Init()
     }
 
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-    CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/LaTaleDoujin_Sharp/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
+    CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/archive/LaTaleDoujin_CSharp_SDL/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
+
+
+    m_PrimitiveBatch = std::make_unique<PrimitiveBatch2>(m_pContext.Get());
+    m_PrimitiveEffect = std::make_unique<BasicEffect>(m_pDevice.Get());
+    m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterRH(0, m_Width, m_Height, 0, 0, 1));
+    m_PrimitiveEffect->SetVertexColorEnabled(true);
+
+    void const* shaderByteCode;
+    size_t byteCodeLength;
+    m_PrimitiveEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
+
+    ThrowIfFailed(m_pDevice->CreateInputLayout(
+        VertexPositionColor::InputElements,
+        VertexPositionColor::InputElementCount,
+        shaderByteCode,
+        byteCodeLength,
+        &m_PrimitiveLayout));
+
+    m_PrimitiveStates = std::make_unique<CommonStates>(m_pDevice.Get());
 
     return true;
 }
@@ -149,6 +156,9 @@ void LaTaleDoujin::OnResize()
     ThrowIfFailed(m_pDevice->CreateRenderTargetView(m_Framebuffer2.Get(), &desc2, &m_Framebuffer2View));
     ThrowIfFailed(m_pDevice->CreateShaderResourceView(m_Framebuffer1.Get(), &desc3, &m_Framebuffer1Tex));
     ThrowIfFailed(m_pDevice->CreateShaderResourceView(m_Framebuffer2.Get(), &desc3, &m_Framebuffer2Tex));
+
+    if (m_PrimitiveEffect)
+        m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterRH(0, m_Width, m_Height, 0, 0, 1));
 }
 
 void LaTaleDoujin::UpdateScene()
@@ -164,9 +174,13 @@ void LaTaleDoujin::DrawScene()
     ID3D11ShaderResourceView* texView = nullptr;
     m_pContext->PSSetShaderResources(0, 1, &texView);
 
+    auto keys = m_Keyboard->GetState();
+    auto buttons = m_Mouse->GetState();
+
     m_pContext->OMSetRenderTargets(1, m_Framebuffer1View.GetAddressOf(), m_pDepthStencilView.Get());
     m_SpriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, nullptr, nullptr, [=]
         {
+            if (keys.IsKeyDown(Keyboard::A)) return;
             m_pContext->PSSetShader(m_GaussianBlur.Get(), nullptr, 0);
             m_pContext->PSSetConstantBuffers(0, 1, m_GaussianParametersH.GetAddressOf());
         });
@@ -177,12 +191,65 @@ void LaTaleDoujin::DrawScene()
     m_pContext->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
     m_SpriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, nullptr, nullptr, [=]
         {
+            if (keys.IsKeyDown(Keyboard::A)) return;
             m_pContext->PSSetShader(m_GaussianBlur.Get(), nullptr, 0);
             m_pContext->PSSetConstantBuffers(0, 1, m_GaussianParametersV.GetAddressOf());
         });
     m_SpriteBatch->Draw(m_Framebuffer1Tex.Get(), XMFLOAT2());
     m_SpriteBatch->End();
 
+    {
+        m_pContext->OMSetBlendState(m_PrimitiveStates->Opaque(), nullptr, 0xFFFFFFFF );
+        m_pContext->OMSetDepthStencilState(m_PrimitiveStates->DepthNone(), 0 );
+        m_pContext->RSSetState(m_PrimitiveStates->CullNone() );
+
+        m_PrimitiveEffect->Apply(m_pContext.Get());
+        m_pContext->IASetInputLayout(m_PrimitiveLayout.Get());
+
+        m_PrimitiveBatch->Begin();
+        m_PrimitiveBatch->DrawLine(
+            VertexPositionColor(XMFLOAT3(0, 0, 0), XMFLOAT4(1, 1, 1, 1)),
+            VertexPositionColor(XMFLOAT3(100, 100, 0), XMFLOAT4(1, 1, 1, 1)));
+        m_PrimitiveBatch->End();
+    }
+
     m_pSwapChain->Present(0, 0);
 }
 
+LRESULT LaTaleDoujin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    switch (msg)
+    {
+    case WM_ACTIVATE:
+    case WM_ACTIVATEAPP:
+        Keyboard::ProcessMessage(msg, wParam, lParam);
+        Mouse::ProcessMessage(msg, wParam, lParam);
+        break;
+
+    case WM_SYSKEYDOWN:
+        Keyboard::ProcessMessage(msg, wParam, lParam);
+        break;
+
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+        Keyboard::ProcessMessage(msg, wParam, lParam);
+        break;
+
+    case WM_INPUT:
+    case WM_MOUSEMOVE:
+    case WM_LBUTTONDOWN:
+    case WM_LBUTTONUP:
+    case WM_RBUTTONDOWN:
+    case WM_RBUTTONUP:
+    case WM_MBUTTONDOWN:
+    case WM_MBUTTONUP:
+    case WM_MOUSEWHEEL:
+    case WM_XBUTTONDOWN:
+    case WM_XBUTTONUP:
+    case WM_MOUSEHOVER:
+        Mouse::ProcessMessage(msg, wParam, lParam);
+        break;
+    }
+    return D3D11Application::WndProc(hWnd, msg, wParam, lParam);
+}
