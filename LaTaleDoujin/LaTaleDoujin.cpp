@@ -67,19 +67,23 @@ void LaTaleDoujin::UpdateScene()
 
 void LaTaleDoujin::DrawScene()
 {
-    static float cornflowerblue[] = { 100.0f/255, 149.0f/255, 237.0f/255, 1.0f };
-    m_pContext->ClearRenderTargetView(m_pRenderTargetView.Get(), cornflowerblue);
+    m_pContext->ClearRenderTargetView(m_pRenderTargetView.Get(), Colors::CornflowerBlue);
     m_pContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     auto keys = m_Keyboard->GetState();
     auto buttons = m_Mouse->GetState();
 
-    m_SpriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, m_CommonStates->DepthDefault());
-    m_SpriteBatch->Draw(m_IrisTexture.Get(), XMFLOAT2(0, 0), nullptr, Colors::White, 0, XMFLOAT2(), 1, SpriteEffects_None, 0.0);
-    m_SpriteBatch->End();
+    m_SpriteBatch->Begin(
+        SpriteSortMode_Deferred,
+        m_CommonStates->AlphaBlend(),
+        m_CommonStates->PointWrap(),
+        m_CommonStates->DepthDefault(),
+        m_CommonStates->CullNone(),
+        nullptr, XMMatrixLookToLH(Vector3(-100, -100, 0), Vector3(0, 0, 1), Vector3(0, 1, 0)));
 
-    m_SpriteBatch->Begin(SpriteSortMode_Deferred, nullptr, nullptr, m_CommonStates->DepthDefault());
-    m_SpriteBatch->Draw(m_IrisTexture.Get(), XMFLOAT2(100, 100), nullptr, Colors::White, 0, XMFLOAT2(), 1, SpriteEffects_None, 0.5);
+    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(0, 0), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0.5);
+    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(100, 100), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0.0);
+
     m_SpriteBatch->End();
 
     {
@@ -92,8 +96,8 @@ void LaTaleDoujin::DrawScene()
 
         m_PrimitiveBatch->Begin();
         m_PrimitiveBatch->DrawLine(
-            VertexPositionColor(XMFLOAT3(0, 0, 0), XMFLOAT4(1, 1, 1, 1)),
-            VertexPositionColor(XMFLOAT3(100, 100, 0), XMFLOAT4(1, 1, 1, 1)));
+            VertexPositionColor(Vector3(0, 0, 0), Vector4(1, 1, 1, 1)),
+            VertexPositionColor(Vector3(100, 100, 0), Vector4(1, 1, 1, 1)));
         m_PrimitiveBatch->End();
     }
 
