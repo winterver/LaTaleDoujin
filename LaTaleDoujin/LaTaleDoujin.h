@@ -9,7 +9,7 @@ namespace DirectX
         class SpriteBatch;
         template<class TVertex>
         class PrimitiveBatch;
-        class VertexPositionColor;
+        struct VertexPositionColor;
         class BasicEffect;
         class CommonStates;
     }

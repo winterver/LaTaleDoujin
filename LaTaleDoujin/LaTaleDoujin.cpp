@@ -36,7 +36,7 @@ bool LaTaleDoujin::Init()
 
     m_PrimitiveBatch = std::make_unique<PrimitiveBatch2>(m_pContext.Get());
     m_PrimitiveEffect = std::make_unique<BasicEffect>(m_pDevice.Get());
-    m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterRH(0, m_Width, m_Height, 0, 0, 1));
+    m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterLH(0, m_Width, m_Height, 0, 0, 1));
     m_PrimitiveEffect->SetVertexColorEnabled(true);
 
     void const* shaderByteCode;
@@ -58,7 +58,7 @@ void LaTaleDoujin::OnResize()
     D3D11Application::OnResize();
 
     if (m_PrimitiveEffect)
-        m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterRH(0, m_Width, m_Height, 0, 0, 1));
+        m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterLH(0, m_Width, m_Height, 0, 0, 1));
 }
 
 void LaTaleDoujin::UpdateScene()
@@ -73,16 +73,21 @@ void LaTaleDoujin::DrawScene()
     auto keys = m_Keyboard->GetState();
     auto buttons = m_Mouse->GetState();
 
+    auto view = XMMatrixLookToLH(
+        Vector3(0, 0, 0),
+        Vector3(0, 0, 1),
+        Vector3(0, 1, 0));
+
     m_SpriteBatch->Begin(
         SpriteSortMode_Deferred,
         m_CommonStates->AlphaBlend(),
-        m_CommonStates->PointWrap(),
+        m_CommonStates->LinearWrap(),
         m_CommonStates->DepthDefault(),
         m_CommonStates->CullNone(),
-        nullptr, XMMatrixLookToLH(Vector3(-100, -100, 0), Vector3(0, 0, 1), Vector3(0, 1, 0)));
+        nullptr, view);
 
-    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(0, 0), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0.5);
-    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(100, 100), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0.0);
+    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(0, 0), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0);
+    m_SpriteBatch->Draw(m_IrisTexture.Get(), Vector2(100, 100), nullptr, Colors::White, 0, Vector2(), 1, SpriteEffects_None, 0);
 
     m_SpriteBatch->End();
 
@@ -91,6 +96,7 @@ void LaTaleDoujin::DrawScene()
         m_pContext->OMSetDepthStencilState(m_CommonStates->DepthNone(), 0);
         m_pContext->RSSetState(m_CommonStates->CullNone());
 
+        m_PrimitiveEffect->SetView(view);
         m_PrimitiveEffect->Apply(m_pContext.Get());
         m_pContext->IASetInputLayout(m_PrimitiveLayout.Get());
 
