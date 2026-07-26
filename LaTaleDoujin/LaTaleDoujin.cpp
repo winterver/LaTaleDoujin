@@ -73,10 +73,19 @@ void LaTaleDoujin::DrawScene()
     auto keys = m_Keyboard->GetState();
     auto buttons = m_Mouse->GetState();
 
+    static float a = 0;
+    a += m_Timer.DeltaTime();
+
+    float cx = m_Width / 2;
+    float cy = m_Height / 2;
+
+    float x = cx - (cx * cos(a) - cy * sin(a));
+    float y = cy - (cx * sin(a) + cy * cos(a));
+
     auto view = XMMatrixLookToLH(
-        Vector3(0, 0, 0),
+        Vector3(x, y, 0),
         Vector3(0, 0, 1),
-        Vector3(0, 1, 0));
+        Vector3(sin(-a), cos(-a), 0));
 
     m_SpriteBatch->Begin(
         SpriteSortMode_Deferred,
