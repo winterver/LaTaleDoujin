@@ -24,6 +24,9 @@ bool LaTaleDoujin::Init()
     bool val = D3D11Application::Init();
     if (!val) return false;
 
+    // Disable window resizing
+    SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE) & ~(WS_SIZEBOX|WS_MAXIMIZEBOX));
+
     m_Keyboard = std::make_unique<Keyboard>();
     m_Mouse = std::make_unique<Mouse>();
     m_Mouse->SetWindow(m_hWnd);
@@ -51,14 +54,6 @@ bool LaTaleDoujin::Init()
         &m_PrimitiveLayout));
 
     return true;
-}
-
-void LaTaleDoujin::OnResize()
-{
-    D3D11Application::OnResize();
-
-    if (m_PrimitiveEffect)
-        m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterLH(0, m_Width, m_Height, 0, 0, 1));
 }
 
 void LaTaleDoujin::UpdateScene()
@@ -129,13 +124,10 @@ LRESULT LaTaleDoujin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         Mouse::ProcessMessage(msg, wParam, lParam);
         break;
 
-    case WM_SYSKEYDOWN:
-        Keyboard::ProcessMessage(msg, wParam, lParam);
-        break;
-
-    case WM_KEYDOWN:
     case WM_KEYUP:
+    case WM_KEYDOWN:
     case WM_SYSKEYUP:
+    case WM_SYSKEYDOWN:
         Keyboard::ProcessMessage(msg, wParam, lParam);
         break;
 

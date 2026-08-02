@@ -33,7 +33,6 @@ public:
     bool Init();
 
 protected:
-    void OnResize();
     void UpdateScene();
     void DrawScene();
 
