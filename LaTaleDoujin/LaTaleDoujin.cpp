@@ -1,12 +1,10 @@
 ﻿#include "LaTaleDoujin.h"
 #include "Utility.h"
+#include "DebugBatch.h"
 #include <SimpleMath.h>
 #include <SpriteBatch.h>
-#include <PrimitiveBatch.h>
-#include <VertexTypes.h>
 #include <Keyboard.h>
 #include <Mouse.h>
-#include <Effects.h>
 #include <CommonStates.h>
 
 using namespace DirectX::SimpleMath;
@@ -37,21 +35,10 @@ bool LaTaleDoujin::Init()
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/archive/LaTaleDoujin_CSharp_SDL/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
 
-    m_PrimitiveBatch = std::make_unique<PrimitiveBatch2>(m_pContext.Get());
-    m_PrimitiveEffect = std::make_unique<BasicEffect>(m_pDevice.Get());
-    m_PrimitiveEffect->SetProjection(XMMatrixOrthographicOffCenterLH(0, m_Width, m_Height, 0, 0, 1));
-    m_PrimitiveEffect->SetVertexColorEnabled(true);
-
-    void const* shaderByteCode;
-    size_t byteCodeLength;
-    m_PrimitiveEffect->GetVertexShaderBytecode(&shaderByteCode, &byteCodeLength);
-
-    ThrowIfFailed(m_pDevice->CreateInputLayout(
-        VertexPositionColor::InputElements,
-        VertexPositionColor::InputElementCount,
-        shaderByteCode,
-        byteCodeLength,
-        &m_PrimitiveLayout));
+    m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
+    m_DebugBatch->PutHollowRect(Vector2(0, 0), Vector2(100, 100));
+    m_DebugBatch->PutSolidRect(Vector2(100, 100), Vector2(100, 100));
+    m_DebugBatch->Update();
 
     return true;
 }
@@ -95,21 +82,10 @@ void LaTaleDoujin::DrawScene()
 
     m_SpriteBatch->End();
 
-    {
-        m_pContext->OMSetBlendState(m_CommonStates->Opaque(), nullptr, 0xFFFFFFFF);
-        m_pContext->OMSetDepthStencilState(m_CommonStates->DepthNone(), 0);
-        m_pContext->RSSetState(m_CommonStates->CullNone());
-
-        m_PrimitiveEffect->SetView(view);
-        m_PrimitiveEffect->Apply(m_pContext.Get());
-        m_pContext->IASetInputLayout(m_PrimitiveLayout.Get());
-
-        m_PrimitiveBatch->Begin();
-        m_PrimitiveBatch->DrawLine(
-            VertexPositionColor(Vector3(0, 0, 0), Vector4(1, 1, 1, 1)),
-            VertexPositionColor(Vector3(100, 100, 0), Vector4(1, 1, 1, 1)));
-        m_PrimitiveBatch->End();
-    }
+    m_pContext->OMSetBlendState(m_CommonStates->Opaque(), nullptr, 0xFFFFFFFF);
+    m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
+    m_pContext->RSSetState(m_CommonStates->CullNone());
+    m_DebugBatch->Draw(view);
 
     m_pSwapChain->Present(0, 0);
 }
@@ -133,6 +109,7 @@ LRESULT LaTaleDoujin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_INPUT:
     case WM_MOUSEMOVE:
+    case WM_MOUSEHOVER:
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
     case WM_RBUTTONDOWN:
@@ -142,7 +119,6 @@ LRESULT LaTaleDoujin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_MOUSEWHEEL:
     case WM_XBUTTONDOWN:
     case WM_XBUTTONUP:
-    case WM_MOUSEHOVER:
         Mouse::ProcessMessage(msg, wParam, lParam);
         break;
     }
