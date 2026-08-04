@@ -86,6 +86,8 @@ void LaTaleDoujin::DrawScene()
     m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
     m_pContext->RSSetState(m_CommonStates->CullNone());
     m_DebugBatch->DrawScene(view);
+    m_DebugBatch->DrawHollowSprite(Vector2(200, 200), Vector2(100, 100), Vector4(1, 0, 0, 1), 0, view);
+    m_DebugBatch->DrawSolidSprite(Vector2(300, 300), Vector2(100, 100), Vector4(1, 0, 0, 1), 0, view);
 
     m_pSwapChain->Present(0, 0);
 }

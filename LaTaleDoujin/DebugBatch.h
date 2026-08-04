@@ -23,6 +23,11 @@ public:
     void UpdateScene();
 
     void DrawScene(Matrix transform = DirectX::XMMatrixIdentity());
+    void DrawHollowSprite(Vector2 position, Vector2 size, Vector4 color = Vector4(1, 1, 1, 1), float depth = 0, Matrix transform = DirectX::XMMatrixIdentity());
+    void DrawSolidSprite(Vector2 position, Vector2 size, Vector4 color = Vector4(1, 1, 1, 1), float depth = 0, Matrix transform = DirectX::XMMatrixIdentity());
+
+private:
+    void Prepare(Matrix transform, Vector4 color);
 
 private:
     ComPtr<ID3D11Device> m_pDevice;
@@ -30,7 +35,9 @@ private:
     ComPtr<ID3D11VertexShader> m_VertexShader;
     ComPtr<ID3D11PixelShader> m_PixelShader;
     ComPtr<ID3D11InputLayout> m_Layout;
-    ComPtr<ID3D11Buffer> m_MVPBuffer;
+
+    struct { Matrix MVP; Vector4 Color; } m_Constants;
+    ComPtr<ID3D11Buffer> m_ConstantBuffer;
 
     std::vector<float> m_Lines;
     std::vector<float> m_Solids;
