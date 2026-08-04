@@ -6,6 +6,9 @@ using namespace DirectX;
 
 DebugBatch::DebugBatch(ID3D11Device* device)
 {
+    ComPtr<ID3DBlob> vertexBlob;
+    ComPtr<ID3DBlob> pixelBlob;
+
     const char source[] = R"(
         struct PSInput
         {
@@ -36,20 +39,17 @@ DebugBatch::DebugBatch(ID3D11Device* device)
         { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-    CD3D11_BUFFER_DESC bufferDesc1(512, D3D11_BIND_VERTEX_BUFFER);
-    CD3D11_BUFFER_DESC bufferDesc2(64, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+    CD3D11_BUFFER_DESC bufferDesc(64, D3D11_BIND_CONSTANT_BUFFER, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-    ThrowIfFailed(D3DCompile(source, sizeof(source), nullptr, nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &m_VertexBlob, nullptr));
-    ThrowIfFailed(D3DCompile(source, sizeof(source), nullptr, nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &m_PixelBlob, nullptr));
-    ThrowIfFailed(device->CreateVertexShader(m_VertexBlob->GetBufferPointer(), m_VertexBlob->GetBufferSize(), nullptr, &m_VertexShader));
-    ThrowIfFailed(device->CreatePixelShader(m_PixelBlob->GetBufferPointer(), m_PixelBlob->GetBufferSize(), nullptr, &m_PixelShader));
-    ThrowIfFailed(device->CreateInputLayout(layoutDesc, ARRAYSIZE(layoutDesc), m_VertexBlob->GetBufferPointer(), m_VertexBlob->GetBufferSize(), &m_Layout));
+    ThrowIfFailed(D3DCompile(source, sizeof(source), nullptr, nullptr, nullptr, "VSMain", "vs_5_0", 0, 0, &vertexBlob, nullptr));
+    ThrowIfFailed(D3DCompile(source, sizeof(source), nullptr, nullptr, nullptr, "PSMain", "ps_5_0", 0, 0, &pixelBlob, nullptr));
+    ThrowIfFailed(device->CreateVertexShader(vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), nullptr, &m_VertexShader));
+    ThrowIfFailed(device->CreatePixelShader(pixelBlob->GetBufferPointer(), pixelBlob->GetBufferSize(), nullptr, &m_PixelShader));
+    ThrowIfFailed(device->CreateInputLayout(layoutDesc, ARRAYSIZE(layoutDesc), vertexBlob->GetBufferPointer(), vertexBlob->GetBufferSize(), &m_Layout));
 
     m_pDevice = device;
     m_pDevice->GetImmediateContext(&m_pContext);
-    ThrowIfFailed(m_pDevice->CreateBuffer(&bufferDesc1, nullptr, &m_LineBuffer));
-    ThrowIfFailed(m_pDevice->CreateBuffer(&bufferDesc1, nullptr, &m_SolidBuffer));
-    ThrowIfFailed(m_pDevice->CreateBuffer(&bufferDesc2, nullptr, &m_MVPBuffer));
+    ThrowIfFailed(m_pDevice->CreateBuffer(&bufferDesc, nullptr, &m_MVPBuffer));
 }
 
 void DebugBatch::PutLine(Vector2 point1, Vector2 point2, Vector4 color, float depth)
@@ -62,25 +62,10 @@ void DebugBatch::PutLine(Vector2 point1, Vector2 point2, Vector4 color, float de
 
 void DebugBatch::PutHollowRect(Vector2 position, Vector2 size, Vector4 color, float depth)
 {
-    m_Lines.push_back(position.x); m_Lines.push_back(position.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-    m_Lines.push_back(position.x+size.x); m_Lines.push_back(position.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-
-    m_Lines.push_back(position.x+size.x); m_Lines.push_back(position.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-    m_Lines.push_back(position.x+size.x); m_Lines.push_back(position.y+size.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-
-    m_Lines.push_back(position.x+size.x); m_Lines.push_back(position.y+size.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-    m_Lines.push_back(position.x); m_Lines.push_back(position.y+size.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-
-    m_Lines.push_back(position.x); m_Lines.push_back(position.y+size.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
-    m_Lines.push_back(position.x); m_Lines.push_back(position.y); m_Lines.push_back(depth);
-    m_Lines.push_back(color.x); m_Lines.push_back(color.y); m_Lines.push_back(color.z); m_Lines.push_back(color.w);
+    PutLine(position, position+Vector2(size.x, 0), color, depth);
+    PutLine(position+Vector2(size.x, 0), position+size, color, depth);
+    PutLine(position+size, position+Vector2(0, size.y), color, depth);
+    PutLine(position+Vector2(0, size.y), position, color, depth);
 }
 
 void DebugBatch::PutSolidRect(Vector2 position, Vector2 size, Vector4 color, float depth)
@@ -100,16 +85,36 @@ void DebugBatch::PutSolidRect(Vector2 position, Vector2 size, Vector4 color, flo
     m_Solids.push_back(color.x); m_Solids.push_back(color.y); m_Solids.push_back(color.z); m_Solids.push_back(color.w);
 }
 
-void DebugBatch::Update()
+void DebugBatch::ClearScene()
 {
-    if (m_Lines.size())
-        m_pContext->UpdateSubresource(m_LineBuffer.Get(), 0, nullptr, m_Lines.data(), m_Lines.size() * 4, m_Lines.size() * 4);
-    if (m_Solids.size())
-        m_pContext->UpdateSubresource(m_SolidBuffer.Get(), 0, nullptr, m_Solids.data(), m_Solids.size() * 4, m_Solids.size() * 4);
+    m_Lines.clear();
+    m_Solids.clear();
+    m_LineBuffer.Reset();
+    m_SolidBuffer.Reset();
 }
 
-void DebugBatch::Draw(Matrix transform)
+void DebugBatch::UpdateScene()
 {
+    if (m_Lines.size())
+    {
+        CD3D11_BUFFER_DESC desc(m_Lines.size() * 4, D3D11_BIND_VERTEX_BUFFER);
+        D3D11_SUBRESOURCE_DATA data = { m_Lines.data(), 0, 0 };
+        ThrowIfFailed(m_pDevice->CreateBuffer(&desc, &data, &m_LineBuffer));
+    }
+
+    if (m_Solids.size())
+    {
+        CD3D11_BUFFER_DESC desc(m_Solids.size() * 4, D3D11_BIND_VERTEX_BUFFER);
+        D3D11_SUBRESOURCE_DATA data = { m_Solids.data(), 0, 0 };
+        ThrowIfFailed(m_pDevice->CreateBuffer(&desc, &data, &m_SolidBuffer));
+    }
+}
+
+void DebugBatch::DrawScene(Matrix transform)
+{
+    if (!m_LineBuffer && !m_SolidBuffer)
+        return;
+
     UINT numViewports = 1;
     D3D11_VIEWPORT viewport;
     m_pContext->RSGetViewports(&numViewports, &viewport);
@@ -127,20 +132,24 @@ void DebugBatch::Draw(Matrix transform)
     m_pContext->PSSetShader(m_PixelShader.Get(), nullptr, 0);
     m_pContext->VSSetConstantBuffers(0, 1, m_MVPBuffer.GetAddressOf());
 
-    UINT stride = 7 * 4;
+    UINT stride = 28;
     UINT offset = 0;
 
-    if (m_Lines.size())
+    if (m_LineBuffer)
     {
+        D3D11_BUFFER_DESC desc;
+        m_LineBuffer->GetDesc(&desc);
         m_pContext->IASetVertexBuffers(0, 1, m_LineBuffer.GetAddressOf(), &stride, &offset);
         m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-        m_pContext->Draw(m_Lines.size() / 7, 0);
+        m_pContext->Draw(desc.ByteWidth / 28, 0);
     }
 
-    if (m_Solids.size())
+    if (m_SolidBuffer)
     {
+        D3D11_BUFFER_DESC desc;
+        m_SolidBuffer->GetDesc(&desc);
         m_pContext->IASetVertexBuffers(0, 1, m_SolidBuffer.GetAddressOf(), &stride, &offset);
         m_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-        m_pContext->Draw(m_Solids.size() / 7, 0);
+        m_pContext->Draw(desc.ByteWidth / 28, 0);
     }
 }

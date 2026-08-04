@@ -38,7 +38,7 @@ bool LaTaleDoujin::Init()
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
     m_DebugBatch->PutHollowRect(Vector2(0, 0), Vector2(100, 100));
     m_DebugBatch->PutSolidRect(Vector2(100, 100), Vector2(100, 100));
-    m_DebugBatch->Update();
+    m_DebugBatch->UpdateScene();
 
     return true;
 }
@@ -85,7 +85,7 @@ void LaTaleDoujin::DrawScene()
     m_pContext->OMSetBlendState(m_CommonStates->Opaque(), nullptr, 0xFFFFFFFF);
     m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
     m_pContext->RSSetState(m_CommonStates->CullNone());
-    m_DebugBatch->Draw(view);
+    m_DebugBatch->DrawScene(view);
 
     m_pSwapChain->Present(0, 0);
 }
