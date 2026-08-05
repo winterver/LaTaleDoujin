@@ -34,6 +34,7 @@ protected:
     bool m_Resizing = false;
     bool m_Enable4xMsaa = false;
     UINT m_4xMsaaQuality = 0;
+    bool m_EnablePause = true;
 
     SysTimer m_Timer;
 

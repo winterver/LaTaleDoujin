@@ -29,7 +29,7 @@ bool D3D11Application::Init()
 int D3D11Application::Run()
 {
     MSG msg = { };
-    m_Timer.Reset();
+    bool recover = true;
 
     while (msg.message != WM_QUIT)
     {
@@ -39,17 +39,21 @@ int D3D11Application::Run()
             DispatchMessage(&msg);
         }
         else {
-            m_Timer.Tick();
-
-            if (!m_AppPaused)
+            if (m_EnablePause ? !m_AppPaused : true)
             {
+                if (recover)
+                {
+                    recover = false;
+                    m_Timer.Reset();
+                }
+                m_Timer.Tick();
                 UpdateScene();
                 DrawScene();
             }
             else
             {
-                m_Timer.Reset();
                 Sleep(100);
+                recover = true;
             }
         }
     }

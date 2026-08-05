@@ -13,6 +13,8 @@ using namespace DirectX;
 LaTaleDoujin::LaTaleDoujin()
     : D3D11Application(L"La Tale Doujin", 1360, 768)
 {
+    m_Enable4xMsaa = true;
+    m_EnablePause = false;
 }
 
 LaTaleDoujin::~LaTaleDoujin() = default;
