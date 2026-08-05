@@ -1,4 +1,4 @@
-#include "LaTaleDoujin.h"
+﻿#include "LaTaleDoujin.h"
 #include <crtdbg.h>
 
 #if defined(_DEBUG)

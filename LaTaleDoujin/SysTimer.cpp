@@ -1,4 +1,4 @@
-#include "SysTimer.h"
+﻿#include "SysTimer.h"
 #include <thread>
 
 SysTimer::SysTimer()

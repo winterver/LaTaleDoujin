@@ -27,14 +27,14 @@ DebugBatch::DebugBatch(ID3D11Device* device)
             PSInput result;
 
             result.Position = mul(float4(position, 1), MVP);
-            result.Color = color;
+            result.Color = color * Color;
 
             return result;
         }
 
         float4 PSMain(PSInput input) : SV_TARGET
         {
-            return input.Color * Color;
+            return input.Color;
         }
     )";
 
@@ -199,5 +199,4 @@ void DebugBatch::Prepare(Matrix transform, Vector4 color)
     m_pContext->VSSetShader(m_VertexShader.Get(), nullptr, 0);
     m_pContext->PSSetShader(m_PixelShader.Get(), nullptr, 0);
     m_pContext->VSSetConstantBuffers(0, 1, m_ConstantBuffer.GetAddressOf());
-    m_pContext->PSSetConstantBuffers(0, 1, m_ConstantBuffer.GetAddressOf());
 }

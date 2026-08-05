@@ -1,4 +1,4 @@
-#include "Utility.h"
+﻿#include "Utility.h"
 #include <wincodec.h>
 #include <wrl/client.h>
 #include <memory>
