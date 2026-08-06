@@ -1,5 +1,6 @@
 ﻿#include "LaTaleDoujin.h"
 #include "ImageLoader.h"
+#include "PhysicsSystem.h"
 #include "DebugBatch.h"
 #include <SimpleMath.h>
 #include <SpriteBatch.h>
@@ -11,7 +12,7 @@ using namespace DirectX::SimpleMath;
 using namespace DirectX;
 
 LaTaleDoujin::LaTaleDoujin()
-    : D3D11Application(L"La Tale Doujin", 1360, 768)
+    : D3D11Application(L"La Tale Doujin", 1600, 900)
 {
     m_Enable4xMsaa = true;
     m_EnablePause = false;
@@ -37,9 +38,16 @@ bool LaTaleDoujin::Init()
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
     CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/archive/LaTaleDoujin_CSharp_SDL/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
 
+    m_PhysicsSystem = std::make_unique<PhysicsSystem>();
+    auto ground1 = m_PhysicsSystem->CreateBody(Vector2(800, 850), Vector2(800, 25), PHYSICS_BODY_FLAG_PLATFORM);
+    auto ground2 = m_PhysicsSystem->CreateBody(Vector2(1600, 750), Vector2(800, 25), PHYSICS_BODY_FLAG_PLATFORM | PHYSICS_BODY_FLAG_ONEWAY);
+    auto ground3 = m_PhysicsSystem->CreateBody(Vector2(1200, 850), Vector2(25, 800), PHYSICS_BODY_FLAG_PLATFORM);
+    m_Player = m_PhysicsSystem->CreateBody(Vector2(800, 450), Vector2(32, 75), PHYSICS_BODY_FLAG_ENTITY);
+
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
-    m_DebugBatch->PutHollowRect(Vector2(0, 0), Vector2(100, 100));
-    m_DebugBatch->PutSolidRect(Vector2(100, 100), Vector2(100, 100));
+    m_DebugBatch->PutSolidRect(ground1->Position - ground1->HalfSize, ground1->HalfSize * 2);
+    m_DebugBatch->PutHollowRect(ground2->Position - ground2->HalfSize, ground2->HalfSize * 2, Vector4(0, 0, 1, 1));
+    m_DebugBatch->PutHollowRect(ground3->Position - ground3->HalfSize, ground3->HalfSize * 2);
     m_DebugBatch->UpdateScene();
 
     return true;
@@ -47,6 +55,24 @@ bool LaTaleDoujin::Init()
 
 void LaTaleDoujin::UpdateScene()
 {
+    auto state = m_Keyboard->GetState();
+
+    if (m_Player->IsGrounded() && state.Right)
+    {
+        m_Player->Velocity.x = 400;
+    }
+
+    if (m_Player->IsGrounded() && state.Left)
+    {
+        m_Player->Velocity.x = -400;
+    }
+
+    if (m_Player->IsGrounded() && state.Space)
+    {
+        m_Player->Velocity.y = -600;
+    }
+
+    m_PhysicsSystem->Update(m_Timer.DeltaTime());
 }
 
 void LaTaleDoujin::DrawScene()
@@ -67,7 +93,7 @@ void LaTaleDoujin::DrawScene()
     float y = cy - (cx * sin(a) + cy * cos(a));
 
     auto view = XMMatrixLookToLH(
-        Vector3(x, y, 0),
+        m_Player->Position - Vector2(800, 450) + Vector3(x, y, 0),
         Vector3(0, 0, 1),
         Vector3(sin(-a), cos(-a), 0));
 
@@ -88,8 +114,7 @@ void LaTaleDoujin::DrawScene()
     m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
     m_pContext->RSSetState(m_CommonStates->CullNone());
     m_DebugBatch->DrawScene(view);
-    m_DebugBatch->DrawHollowSprite(Vector2(200, 200), Vector2(100, 100), Vector4(1, 0, 0, 1), 0, view);
-    m_DebugBatch->DrawSolidSprite(Vector2(300, 300), Vector2(100, 100), Vector4(1, 0, 0, 1), 0, view);
+    m_DebugBatch->DrawHollowSprite(m_Player->Position - m_Player->HalfSize, m_Player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
 
     m_pSwapChain->Present(0, 0);
 }
