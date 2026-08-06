@@ -1,18 +1,13 @@
 ﻿#pragma once
 #include <d3d11_1.h>
-#include <wrl/client.h>
+#include "Utility.h"
 #include <SimpleMath.h>
 #include <vector>
 
-using Microsoft::WRL::ComPtr;
+using namespace DirectX::SimpleMath;
 
 class DebugBatch
 {
-    using Vector2 = DirectX::SimpleMath::Vector2;
-    using Vector3 = DirectX::SimpleMath::Vector3;
-    using Vector4 = DirectX::SimpleMath::Vector4;
-    using Matrix = DirectX::SimpleMath::Matrix;
-
 public:
     DebugBatch(ID3D11Device* device);
 

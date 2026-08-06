@@ -1,10 +1,8 @@
 ﻿#pragma once
 #include <Windows.h>
 #include <d3d11_1.h>
-#include <wrl/client.h>
+#include "Utility.h"
 #include "SysTimer.h"
-
-using Microsoft::WRL::ComPtr;
 
 class D3D11Application
 {

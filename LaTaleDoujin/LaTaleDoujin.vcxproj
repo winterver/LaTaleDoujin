@@ -133,10 +133,11 @@
   <ItemGroup>
     <ClCompile Include="D3D11Application.cpp" />
     <ClCompile Include="DebugBatch.cpp" />
+    <ClCompile Include="ImageLoader.cpp" />
     <ClCompile Include="LaTaleDoujin.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PhysicsSystem.cpp" />
     <ClCompile Include="SysTimer.cpp" />
-    <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectXTK-may2026\DirectXTK_Desktop_2022.vcxproj">
@@ -146,6 +147,8 @@
   <ItemGroup>
     <ClInclude Include="D3D11Application.h" />
     <ClInclude Include="DebugBatch.h" />
+    <ClInclude Include="ImageLoader.h" />
+    <ClInclude Include="PhysicsSystem.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="LaTaleDoujin.h" />
     <ClInclude Include="SysTimer.h" />

@@ -1,5 +1,5 @@
 ﻿#include "LaTaleDoujin.h"
-#include "Utility.h"
+#include "ImageLoader.h"
 #include "DebugBatch.h"
 #include <SimpleMath.h>
 #include <SpriteBatch.h>

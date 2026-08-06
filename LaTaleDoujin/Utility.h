@@ -10,9 +10,11 @@
 //*********************************************************
 
 #pragma once
+#include <wrl/client.h>
 #include <Windows.h>
-#include <d3d11_1.h>
 #include <stdexcept>
+
+using Microsoft::WRL::ComPtr;
 
 inline std::string HrToString(HRESULT hr)
 {
@@ -39,11 +41,3 @@ inline void ThrowIfFailed(HRESULT hr)
         throw HrException(hr);
     }
 }
-
-void CreateTextureFromFile(
-    ID3D11Device* pDevice,
-    _In_opt_ ID3D11DeviceContext* pContext,
-    const WCHAR* szFileName,
-    _Outptr_ ID3D11ShaderResourceView** textureView);
-
-void LoadDataFromResource(LPVOID& ptr, SIZE_T& length, LPCWSTR lpName, LPCWSTR lpType);
