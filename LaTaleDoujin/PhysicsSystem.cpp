@@ -24,10 +24,9 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     float exitTime;
 
     AABB broad {
-        vel.x > 0 ? b1.x : b1.x + vel.x,
-        vel.y > 0 ? b1.y : b1.y + vel.y,
-        b1.w + std::abs(vel.x),
-        b1.h + std::abs(vel.y)
+        b1.x + vel.x,
+        b1.y + vel.y,
+        b1.w, b1.h,
     };
 
     if (!SimpleAABB(broad, b2)) {

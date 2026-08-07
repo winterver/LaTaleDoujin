@@ -40,7 +40,7 @@ bool LaTaleDoujin::Init()
 
     m_PhysicsSystem = std::make_unique<PhysicsSystem>();
     auto ground1 = m_PhysicsSystem->CreateBody(Vector2(800, 850), Vector2(800, 25), PHYSICS_BODY_FLAG_PLATFORM);
-    auto ground2 = m_PhysicsSystem->CreateBody(Vector2(1600, 750), Vector2(800, 25), PHYSICS_BODY_FLAG_PLATFORM | PHYSICS_BODY_FLAG_ONEWAY);
+    auto ground2 = m_PhysicsSystem->CreateBody(Vector2(1600, 750), Vector2(800, 90), PHYSICS_BODY_FLAG_PLATFORM | PHYSICS_BODY_FLAG_ONEWAY);
     auto ground3 = m_PhysicsSystem->CreateBody(Vector2(1200, 850), Vector2(25, 800), PHYSICS_BODY_FLAG_PLATFORM);
     m_Player = m_PhysicsSystem->CreateBody(Vector2(800, 450), Vector2(32, 75), PHYSICS_BODY_FLAG_ENTITY);
 
@@ -84,7 +84,7 @@ void LaTaleDoujin::DrawScene()
     auto buttons = m_Mouse->GetState();
 
     static float a = 0;
-    a += m_Timer.DeltaTime();
+    //a += m_Timer.DeltaTime();
 
     float cx = m_Width / 2;
     float cy = m_Height / 2;
