@@ -19,7 +19,7 @@ using DirectX::Keyboard;
 using DirectX::Mouse;
 
 class PhysicsSystem;
-struct PhysicsBody;
+struct Entity;
 class DebugBatch;
 
 class LaTaleDoujin : public D3D11Application
@@ -45,6 +45,6 @@ private:
     ComPtr<ID3D11ShaderResourceView> m_IrisTexture;
 
     std::unique_ptr<PhysicsSystem> m_PhysicsSystem;
-    PhysicsBody* m_Player = nullptr;
+    Entity* m_Player = nullptr;
     std::unique_ptr<DebugBatch> m_DebugBatch;
 };

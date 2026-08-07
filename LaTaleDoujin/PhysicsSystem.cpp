@@ -60,12 +60,36 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     return entryTime;
 }
 
-PhysicsBody* PhysicsSystem::CreateBody(Vector2 position, Vector2 halfSize, int flags)
+Platform* PhysicsSystem::CreatePlatform(Vector2 position, Vector2 size, bool isOneway)
 {
-    auto body = std::make_unique<PhysicsBody>(PhysicsBody{ position, Vector2(), halfSize, Vector2(), Vector2(), flags});
-    PhysicsBody* pbody = body.get();
+    auto body = std::make_unique<Platform>(position, size, isOneway);
+    Platform* pbody = body.get();
 
     m_Bodies.push_back(std::move(body));
+    m_Endpoints.push_back(Endpoint{ true, pbody });
+    m_Endpoints.push_back(Endpoint{ false, pbody });
+
+    return pbody;
+}
+
+Slope* PhysicsSystem::CreateSlope(Vector2 leftEnd, Vector2 rightEnd)
+{
+    auto body = std::make_unique<Slope>(leftEnd, rightEnd);
+    Slope* pbody = body.get();
+
+    m_Bodies.push_back(std::move(body));
+    m_Endpoints.push_back(Endpoint{ true, pbody });
+    m_Endpoints.push_back(Endpoint{ false, pbody });
+
+    return pbody;
+}
+
+Entity* PhysicsSystem::CreateEntity(Vector2 position, Vector2 halfSize)
+{
+    auto body = std::make_unique<Entity>(position, halfSize);
+    Entity* pbody = body.get();
+
+    m_Entities.push_back(std::move(body));
     m_Endpoints.push_back(Endpoint{ true, pbody });
     m_Endpoints.push_back(Endpoint{ false, pbody });
 
@@ -75,14 +99,11 @@ PhysicsBody* PhysicsSystem::CreateBody(Vector2 position, Vector2 halfSize, int f
 void PhysicsSystem::Update(float delta)
 {
     // integrate velocities
-    for (auto& body : m_Bodies)
+    for (auto& entity : m_Entities)
     {
-        if (body->Flags & PHYSICS_BODY_FLAG_ENTITY)
-        {
-            body->Velocity += Vector2(0, 1000) * delta;
-            body->CollisionTime = Vector2(1, 1);
-            body->CollisionNormal = Vector2();
-        }
+        entity->Velocity += Vector2(0, 1000) * delta;
+        entity->CollisionTime = Vector2(1, 1);
+        entity->CollisionNormal = Vector2();
     }
 
     // broadphase
@@ -95,7 +116,7 @@ void PhysicsSystem::Update(float delta)
         }
     );
 
-    std::vector<std::pair<PhysicsBody*, PhysicsBody*>> pairs;
+    std::vector<std::pair<Entity*, PhysicsBody*>> pairs;
     std::vector<PhysicsBody*> active;
 
     for (auto& e : m_Endpoints)
@@ -104,11 +125,14 @@ void PhysicsSystem::Update(float delta)
         {
             for (PhysicsBody* other : active)
             {
-                if (((e.Body->Flags & PHYSICS_BODY_FLAG_PLATFORM) && (other->Flags & PHYSICS_BODY_FLAG_PLATFORM))
-                    || ((e.Body->Flags & PHYSICS_BODY_FLAG_ENTITY) && (other->Flags & PHYSICS_BODY_FLAG_ENTITY)))
+                if (((e.Body->Type != BodyType::Entity) && (other->Type != BodyType::Entity))
+                    || ((e.Body->Type == BodyType::Entity) && (other->Type == BodyType::Entity)))
                     continue;
 
-                pairs.push_back({ e.Body, other });
+                Entity* entity = (Entity*)(e.Body->Type == BodyType::Entity ? e.Body : other);
+                PhysicsBody* body = e.Body->Type != BodyType::Entity ? e.Body : other;
+
+                pairs.push_back({ entity, body });
             }
             active.push_back(e.Body);
         }
@@ -121,8 +145,8 @@ void PhysicsSystem::Update(float delta)
     // narrowphase, swept aabb
     for (auto& pair : pairs)
     {
-        PhysicsBody* entity = pair.first->Flags & PHYSICS_BODY_FLAG_ENTITY ? pair.first : pair.second;
-        PhysicsBody* platform = pair.first->Flags & PHYSICS_BODY_FLAG_PLATFORM ? pair.first : pair.second;
+        Entity* entity = pair.first;
+        Platform* platform = (Platform*)pair.second;
 
         AABB aabb1 = {
             (entity->Position - entity->HalfSize).x,
@@ -132,16 +156,16 @@ void PhysicsSystem::Update(float delta)
         };
 
         AABB aabb2 = {
-            (platform->Position - platform->HalfSize).x,
-            (platform->Position - platform->HalfSize).y,
-            platform->HalfSize.x * 2,
-            platform->HalfSize.y * 2,
+            platform->Position.x,
+            platform->Position.y,
+            platform->Size.x,
+            platform->Size.y,
         };
 
         Vector2 tmp;
         float time = SweptAABB(aabb1, aabb2, entity->Velocity * delta, tmp);
 
-        if (tmp.y >= 0 && (platform->Flags & PHYSICS_BODY_FLAG_ONEWAY))
+        if (tmp.y >= 0 && platform->IsOneway)
             continue;
 
         if (tmp.x && time < entity->CollisionTime.x) {
@@ -156,26 +180,23 @@ void PhysicsSystem::Update(float delta)
     }
 
     // integrate positions
-    for (auto& body : m_Bodies)
+    for (auto& entity : m_Entities)
     {
-        if (!(body->Flags & PHYSICS_BODY_FLAG_ENTITY))
-            continue;
-
-        if (!body->CollisionTime.x || !body->CollisionTime.y) {
-            if (!body->CollisionTime.x) {
-                body->Position.y += body->Velocity.y * body->CollisionTime.y * delta;
+        if (!entity->CollisionTime.x || !entity->CollisionTime.y) {
+            if (!entity->CollisionTime.x) {
+                entity->Position.y += entity->Velocity.y * entity->CollisionTime.y * delta;
             }
-            if (!body->CollisionTime.y) {
-                body->Position.x += body->Velocity.x * body->CollisionTime.x * delta;
+            if (!entity->CollisionTime.y) {
+                entity->Position.x += entity->Velocity.x * entity->CollisionTime.x * delta;
             }
         }
         else {
-            body->Position.x += body->Velocity.x * body->CollisionTime.x * delta;
-            body->Position.y += body->Velocity.y * body->CollisionTime.y * delta;
+            entity->Position.x += entity->Velocity.x * entity->CollisionTime.x * delta;
+            entity->Position.y += entity->Velocity.y * entity->CollisionTime.y * delta;
         }
 
-        if (body->IsGrounded()) {
-            body->Velocity = Vector2();
+        if (entity->IsGrounded()) {
+            entity->Velocity = Vector2();
         }
     }
 }

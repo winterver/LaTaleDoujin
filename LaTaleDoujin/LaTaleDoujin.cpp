@@ -39,15 +39,15 @@ bool LaTaleDoujin::Init()
     CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/archive/LaTaleDoujin_CSharp_SDL/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
 
     m_PhysicsSystem = std::make_unique<PhysicsSystem>();
-    auto ground1 = m_PhysicsSystem->CreateBody(Vector2(800, 850), Vector2(800, 25), PHYSICS_BODY_FLAG_PLATFORM);
-    auto ground2 = m_PhysicsSystem->CreateBody(Vector2(1600, 750), Vector2(800, 90), PHYSICS_BODY_FLAG_PLATFORM | PHYSICS_BODY_FLAG_ONEWAY);
-    auto ground3 = m_PhysicsSystem->CreateBody(Vector2(1200, 850), Vector2(25, 800), PHYSICS_BODY_FLAG_PLATFORM);
-    m_Player = m_PhysicsSystem->CreateBody(Vector2(800, 450), Vector2(32, 75), PHYSICS_BODY_FLAG_ENTITY);
+    auto ground1 = m_PhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
+    auto ground2 = m_PhysicsSystem->CreatePlatform(Vector2(800, 660), Vector2(800, 90), true);
+    auto ground3 = m_PhysicsSystem->CreatePlatform(Vector2(1200, 50), Vector2(50, 800));
+    m_Player = m_PhysicsSystem->CreateEntity(Vector2(800, 450), Vector2(32, 75));
 
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
-    m_DebugBatch->PutSolidRect(ground1->Position - ground1->HalfSize, ground1->HalfSize * 2);
-    m_DebugBatch->PutHollowRect(ground2->Position - ground2->HalfSize, ground2->HalfSize * 2, Vector4(0, 0, 1, 1));
-    m_DebugBatch->PutHollowRect(ground3->Position - ground3->HalfSize, ground3->HalfSize * 2);
+    m_DebugBatch->PutSolidRect(ground1->Position, ground1->Size);
+    m_DebugBatch->PutHollowRect(ground2->Position, ground2->Size, Vector4(0, 0, 1, 1));
+    m_DebugBatch->PutHollowRect(ground3->Position, ground3->Size);
     m_DebugBatch->UpdateScene();
 
     return true;
