@@ -42,7 +42,7 @@ bool LaTaleDoujin::Init()
     auto ground1 = m_PhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
     auto ground2 = m_PhysicsSystem->CreatePlatform(Vector2(800, 660), Vector2(800, 90), true);
     auto ground3 = m_PhysicsSystem->CreatePlatform(Vector2(1200, 50), Vector2(50, 800));
-    m_Player = m_PhysicsSystem->CreateEntity(Vector2(800, 450), Vector2(32, 75));
+    m_Player = m_PhysicsSystem->CreateEntity(Vector2(700, 450), Vector2(32, 75));
 
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
     m_DebugBatch->PutSolidRect(ground1->Position, ground1->Size);

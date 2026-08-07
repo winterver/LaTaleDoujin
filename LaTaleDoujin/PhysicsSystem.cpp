@@ -29,8 +29,9 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
         b1.w, b1.h,
     };
 
-    if (!SimpleAABB(broad, b2)) {
-        normal = {0, 0};
+    if (!SimpleAABB(broad, b2))
+    {
+        normal = { 0, 0 };
         return 1.0f;
     }
 
@@ -39,16 +40,17 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     yInvEntry = (vel.y > 0) ? b2.y - (b1.y + b1.h) : (b2.y + b2.h) - b1.y;
     yInvExit  = (vel.y > 0) ? (b2.y + b2.h) - b1.y : b2.y - (b1.y + b1.h);
 
-    xEntry = std::abs(vel.x) < 1e-5f ? -INFINITY : xInvEntry / vel.x;
-    xExit  = std::abs(vel.x) < 1e-5f ?  INFINITY : xInvExit  / vel.x;
-    yEntry = std::abs(vel.y) < 1e-5f ? -INFINITY : yInvEntry / vel.y;
-    yExit  = std::abs(vel.y) < 1e-5f ?  INFINITY : yInvExit  / vel.y;
+    xEntry = !std::abs(vel.x) ? -INFINITY : xInvEntry / vel.x;
+    xExit  = !std::abs(vel.x) ?  INFINITY : xInvExit  / vel.x;
+    yEntry = !std::abs(vel.y) ? -INFINITY : yInvEntry / vel.y;
+    yExit  = !std::abs(vel.y) ?  INFINITY : yInvExit  / vel.y;
 
     entryTime = max(xEntry, yEntry);
     exitTime  = min(xExit, yExit);
 
-    if (entryTime > exitTime || (xEntry < 0 && yEntry < 0) || xEntry > 1.0f || yEntry > 1.0f) {
-        normal = {0, 0};
+    if (entryTime > exitTime || (xEntry < 0 && yEntry < 0) || xEntry > 1.0f || yEntry > 1.0f)
+    {
+        normal = { 0, 0 };
         return 1.0f;
     }
 
@@ -142,31 +144,40 @@ void PhysicsSystem::Update(float delta)
         }
     }
 
-    // narrowphase, swept aabb
+    // narrowphase
     for (auto& pair : pairs)
     {
         Entity* entity = pair.first;
-        Platform* platform = (Platform*)pair.second;
-
-        AABB aabb1 = {
-            (entity->Position - entity->HalfSize).x,
-            (entity->Position - entity->HalfSize).y,
-            entity->HalfSize.x * 2,
-            entity->HalfSize.y * 2,
-        };
-
-        AABB aabb2 = {
-            platform->Position.x,
-            platform->Position.y,
-            platform->Size.x,
-            platform->Size.y,
-        };
-
+        float time = 1.0f;
         Vector2 tmp;
-        float time = SweptAABB(aabb1, aabb2, entity->Velocity * delta, tmp);
 
-        if (tmp.y >= 0 && platform->IsOneway)
-            continue;
+        switch (pair.second->Type)
+        {
+            case BodyType::Platform:
+            {
+                Platform* platform = (Platform*)pair.second;
+
+                AABB aabb1 = {
+                    (entity->Position - entity->HalfSize).x,
+                    (entity->Position - entity->HalfSize).y,
+                    entity->HalfSize.x * 2,
+                    entity->HalfSize.y * 2,
+                };
+
+                AABB aabb2 = {
+                    platform->Position.x,
+                    platform->Position.y,
+                    platform->Size.x,
+                    platform->Size.y,
+                };
+
+                time = SweptAABB(aabb1, aabb2, entity->Velocity * delta, tmp);
+
+                if (tmp.y >= 0 && platform->IsOneway)
+                    continue;
+            }
+            break;
+        }
 
         if (tmp.x && time < entity->CollisionTime.x) {
             entity->CollisionTime.x = time;
