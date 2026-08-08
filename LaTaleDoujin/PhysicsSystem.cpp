@@ -120,21 +120,21 @@ void PhysicsSystem::Update(float delta)
         }
     );
 
-    std::vector<std::pair<Entity*, PhysicsBody*>> pairs;
-    std::vector<PhysicsBody*> active;
+    std::vector<std::pair<Entity*, Body*>> pairs;
+    std::vector<Body*> active;
 
     for (auto& e : m_Endpoints)
     {
         if (e.IsStart)
         {
-            for (PhysicsBody* other : active)
+            for (Body* other : active)
             {
                 if (((e.Body->Type != BodyType::Entity) && (other->Type != BodyType::Entity))
                     || ((e.Body->Type == BodyType::Entity) && (other->Type == BodyType::Entity)))
                     continue;
 
                 Entity* entity = (Entity*)(e.Body->Type == BodyType::Entity ? e.Body : other);
-                PhysicsBody* body = e.Body->Type != BodyType::Entity ? e.Body : other;
+                Body* body = e.Body->Type != BodyType::Entity ? e.Body : other;
 
                 pairs.push_back({ entity, body });
             }

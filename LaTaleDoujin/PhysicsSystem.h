@@ -13,20 +13,20 @@ enum class BodyType
     Entity,
 };
 
-struct PhysicsBody {
+struct Body {
     BodyType Type;
-    PhysicsBody(BodyType type) : Type(type) { }
+    Body(BodyType type) : Type(type) { }
     virtual float GetEndpointX(bool isStart) = 0;
 };
 
-struct Platform : PhysicsBody
+struct Platform : Body
 {
     Vector2 Position;
     Vector2 Size;
     bool IsOneway;
 
     Platform(Vector2 position, Vector2 size, bool isOneway)
-        : PhysicsBody(BodyType::Platform)
+        : Body(BodyType::Platform)
         , Position(position)
         , Size(size)
         , IsOneway(isOneway)
@@ -38,13 +38,13 @@ struct Platform : PhysicsBody
     }
 };
 
-struct Slope : PhysicsBody
+struct Slope : Body
 {
     Vector2 LeftEnd;
     Vector2 RightEnd;
 
     Slope(Vector2 leftEnd, Vector2 rightEnd)
-        : PhysicsBody(BodyType::Slope)
+        : Body(BodyType::Slope)
         , LeftEnd(leftEnd)
         , RightEnd(rightEnd)
     { }
@@ -55,17 +55,17 @@ struct Slope : PhysicsBody
     }
 };
 
-struct Entity : PhysicsBody
+struct Entity : Body
 {
     Vector2 Position;
     Vector2 Velocity;
     Vector2 HalfSize;
     Vector2 CollisionTime;
-    PhysicsBody* Ground;
+    Body* Ground;
     bool IsGrounded;
 
     Entity(Vector2 position, Vector2 halfSize)
-        : PhysicsBody(BodyType::Entity)
+        : Body(BodyType::Entity)
         , Position(position)
         , HalfSize(halfSize)
         , Ground(nullptr)
@@ -81,7 +81,7 @@ struct Entity : PhysicsBody
 struct Endpoint
 {
     bool IsStart;
-    PhysicsBody* Body;
+    Body* Body;
     float GetX() {
         return Body->GetEndpointX(IsStart);
     }
@@ -96,7 +96,7 @@ public:
     void Update(float delta);
 
 private:
-    std::vector<std::unique_ptr<PhysicsBody>> m_Bodies;
+    std::vector<std::unique_ptr<Body>> m_Bodies;
     std::vector<std::unique_ptr<Entity>> m_Entities;
     std::vector<Endpoint> m_Endpoints;
 };
