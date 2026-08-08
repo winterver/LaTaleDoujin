@@ -57,17 +57,17 @@ void LaTaleDoujin::UpdateScene()
 {
     auto state = m_Keyboard->GetState();
 
-    if (m_Player->IsGrounded() && state.Right)
+    if (m_Player->IsGrounded && state.Right)
     {
         m_Player->Velocity.x = 400;
     }
 
-    if (m_Player->IsGrounded() && state.Left)
+    if (m_Player->IsGrounded && state.Left)
     {
         m_Player->Velocity.x = -400;
     }
 
-    if (m_Player->IsGrounded() && state.Space)
+    if (m_Player->IsGrounded && state.Space)
     {
         m_Player->Velocity.y = -600;
     }

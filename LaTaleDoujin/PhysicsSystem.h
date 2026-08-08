@@ -61,21 +61,20 @@ struct Entity : PhysicsBody
     Vector2 Velocity;
     Vector2 HalfSize;
     Vector2 CollisionTime;
-    Vector2 CollisionNormal;
+    PhysicsBody* Ground;
+    bool IsGrounded;
 
     Entity(Vector2 position, Vector2 halfSize)
         : PhysicsBody(BodyType::Entity)
         , Position(position)
         , HalfSize(halfSize)
+        , Ground(nullptr)
+        , IsGrounded(false)
     { }
 
     float GetEndpointX(bool isStart)
     {
         return Position.x - HalfSize.x * (isStart ? 1 : -1);
-    }
-
-    bool IsGrounded() {
-        return !CollisionTime.y && CollisionNormal.y < 0;
     }
 };
 

@@ -1,5 +1,6 @@
 ﻿#include "PhysicsSystem.h"
 #include <algorithm>
+#include <iostream>
 
 struct AABB
 {
@@ -23,7 +24,7 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     float entryTime;
     float exitTime;
 
-    AABB broad {
+    AABB broad{
         b1.x + vel.x,
         b1.y + vel.y,
         b1.w, b1.h,
@@ -105,7 +106,8 @@ void PhysicsSystem::Update(float delta)
     {
         entity->Velocity += Vector2(0, 1000) * delta;
         entity->CollisionTime = Vector2(1, 1);
-        entity->CollisionNormal = Vector2();
+        entity->Ground = nullptr;
+        entity->IsGrounded = false;
     }
 
     // broadphase
@@ -157,14 +159,14 @@ void PhysicsSystem::Update(float delta)
             {
                 Platform* platform = (Platform*)pair.second;
 
-                AABB aabb1 = {
+                AABB aabb1{
                     (entity->Position - entity->HalfSize).x,
                     (entity->Position - entity->HalfSize).y,
                     entity->HalfSize.x * 2,
                     entity->HalfSize.y * 2,
                 };
 
-                AABB aabb2 = {
+                AABB aabb2{
                     platform->Position.x,
                     platform->Position.y,
                     platform->Size.x,
@@ -181,33 +183,48 @@ void PhysicsSystem::Update(float delta)
 
         if (tmp.x && time < entity->CollisionTime.x) {
             entity->CollisionTime.x = time;
-            entity->CollisionNormal.x = tmp.x;
         }
 
         if (tmp.y && time < entity->CollisionTime.y) {
             entity->CollisionTime.y = time;
-            entity->CollisionNormal.y = tmp.y;
+            entity->Ground = pair.second;
         }
     }
 
     // integrate positions
     for (auto& entity : m_Entities)
     {
-        if (!entity->CollisionTime.x || !entity->CollisionTime.y) {
-            if (!entity->CollisionTime.x) {
-                entity->Position.y += entity->Velocity.y * entity->CollisionTime.y * delta;
-            }
-            if (!entity->CollisionTime.y) {
-                entity->Position.x += entity->Velocity.x * entity->CollisionTime.x * delta;
-            }
-        }
-        else {
-            entity->Position.x += entity->Velocity.x * entity->CollisionTime.x * delta;
-            entity->Position.y += entity->Velocity.y * entity->CollisionTime.y * delta;
+        entity->Position += entity->Velocity * entity->CollisionTime * delta;
+        bool stillColliding = false;
+
+        if (entity->Ground)
+        {
+            AABB aabb1{
+                (entity->Position - entity->HalfSize).x,
+                (entity->Position - entity->HalfSize).y+1,
+                entity->HalfSize.x * 2,
+                entity->HalfSize.y * 2,
+            };
+
+            AABB aabb2{
+                ((Platform*)entity->Ground)->Position.x,
+                ((Platform*)entity->Ground)->Position.y,
+                ((Platform*)entity->Ground)->Size.x,
+                ((Platform*)entity->Ground)->Size.y,
+            };
+
+            stillColliding = SimpleAABB(aabb1, aabb2);
         }
 
-        if (entity->IsGrounded()) {
+        entity->IsGrounded = !entity->CollisionTime.y && stillColliding;
+
+        if (entity->IsGrounded)
+        {
             entity->Velocity = Vector2();
+        }
+        else
+        {
+            entity->Ground = nullptr;
         }
     }
 }
