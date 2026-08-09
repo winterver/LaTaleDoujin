@@ -7,7 +7,7 @@ static bool SimpleAABB(const AABB& b1, const AABB& b2) {
     float r = (b2.x + b2.w) - b1.x;
     float t = (b2.y + b2.h) - b1.y;
     float b = b2.y - (b1.y + b1.h);
-    return !(l > 0 || r < 0 || t < 0 || b > 0);
+    return !(l >= 0 || r <= 0 || t <= 0 || b >= 0);
 }
 
 static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vector2& normal) {
@@ -204,7 +204,7 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        if (entity->CollisionNormal.x || entity->CollisionNormal.y)
+        if (entity->CollisionNormal.LengthSquared())
             entity->CollisionTime = 1.0f;
     }
 
@@ -219,7 +219,7 @@ void PhysicsSystem::Update(float delta)
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-                if (!entity->CollisionNormal.x && !entity->CollisionNormal.y) continue;
+                if (!entity->CollisionNormal.LengthSquared()) continue;
 
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Reject(entity->Velocity, entity->CollisionNormal) * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
