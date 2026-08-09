@@ -140,11 +140,14 @@ std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
         {
             for (Body* other : active)
             {
-                if (e.Body->Type() == other->Type())
+                bool eIsEntity = e.Body->Type() == BodyType::Entity;
+                bool otherIsEntity = other->Type() == BodyType::Entity;
+
+                if (eIsEntity == otherIsEntity)
                     continue;
 
-                Entity* entity = (Entity*)(e.Body->Type() == BodyType::Entity ? e.Body : other);
-                Body* body = e.Body->Type() != BodyType::Entity ? e.Body : other;
+                Entity* entity = (Entity*)(eIsEntity ? e.Body : other);
+                Body* body = eIsEntity ? other : e.Body;
 
                 m_Pairs.push_back({ entity, body });
             }
