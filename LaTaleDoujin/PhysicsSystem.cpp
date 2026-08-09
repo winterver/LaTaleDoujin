@@ -129,12 +129,12 @@ void PhysicsSystem::Update(float delta)
         {
             for (Body* other : active)
             {
-                if (((e.Body->Type != BodyType::Entity) && (other->Type != BodyType::Entity))
-                    || ((e.Body->Type == BodyType::Entity) && (other->Type == BodyType::Entity)))
+                if (((e.Body->Type() != BodyType::Entity) && (other->Type() != BodyType::Entity))
+                    || ((e.Body->Type() == BodyType::Entity) && (other->Type() == BodyType::Entity)))
                     continue;
 
-                Entity* entity = (Entity*)(e.Body->Type == BodyType::Entity ? e.Body : other);
-                Body* body = e.Body->Type != BodyType::Entity ? e.Body : other;
+                Entity* entity = (Entity*)(e.Body->Type() == BodyType::Entity ? e.Body : other);
+                Body* body = e.Body->Type() != BodyType::Entity ? e.Body : other;
 
                 pairs.push_back({ entity, body });
             }
@@ -153,7 +153,7 @@ void PhysicsSystem::Update(float delta)
         float time = 1.0f;
         Vector2 tmp;
 
-        switch (pair.second->Type)
+        switch (pair.second->Type())
         {
             case BodyType::Platform:
             {

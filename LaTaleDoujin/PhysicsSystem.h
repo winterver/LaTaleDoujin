@@ -14,8 +14,7 @@ enum class BodyType
 };
 
 struct Body {
-    BodyType Type;
-    Body(BodyType type) : Type(type) { }
+    virtual BodyType Type() = 0;
     virtual float GetEndpointX(bool isStart) = 0;
 };
 
@@ -26,11 +25,12 @@ struct Platform : Body
     bool IsOneway;
 
     Platform(Vector2 position, Vector2 size, bool isOneway)
-        : Body(BodyType::Platform)
-        , Position(position)
+        : Position(position)
         , Size(size)
         , IsOneway(isOneway)
     { }
+
+    BodyType Type() { return BodyType::Platform; }
 
     float GetEndpointX(bool isStart)
     {
@@ -44,10 +44,11 @@ struct Slope : Body
     Vector2 RightEnd;
 
     Slope(Vector2 leftEnd, Vector2 rightEnd)
-        : Body(BodyType::Slope)
-        , LeftEnd(leftEnd)
+        : LeftEnd(leftEnd)
         , RightEnd(rightEnd)
     { }
+
+    BodyType Type() { return BodyType::Slope; }
 
     float GetEndpointX(bool isStart)
     {
@@ -65,12 +66,13 @@ struct Entity : Body
     bool IsGrounded;
 
     Entity(Vector2 position, Vector2 halfSize)
-        : Body(BodyType::Entity)
-        , Position(position)
+        : Position(position)
         , HalfSize(halfSize)
         , Ground(nullptr)
         , IsGrounded(false)
     { }
+
+    BodyType Type() { return BodyType::Entity; }
 
     float GetEndpointX(bool isStart)
     {
