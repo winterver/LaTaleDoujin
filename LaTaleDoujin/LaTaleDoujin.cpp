@@ -42,10 +42,6 @@ bool LaTaleDoujin::Init()
     auto ground1 = m_PhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
     auto ground2 = m_PhysicsSystem->CreatePlatform(Vector2(800, 660), Vector2(800, 90), true);
     auto ground3 = m_PhysicsSystem->CreatePlatform(Vector2(1200, 50), Vector2(50, 800));
-    for (int i = 0; i < 10000; i++)
-    {
-        m_PhysicsSystem->CreatePlatform(Vector2(10000, 10000), Vector2(1, 1));
-    }
     m_Player = m_PhysicsSystem->CreateEntity(Vector2(700, 450), Vector2(32, 75));
 
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
