@@ -59,7 +59,7 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
 }
 
 template <typename RandomIt, typename Compare>
-bool insertion_sort_changed(RandomIt first, RandomIt last, Compare comp)
+static bool insertion_sort_changed(RandomIt first, RandomIt last, Compare comp)
 {
     bool changed = false;
 
@@ -79,6 +79,11 @@ bool insertion_sort_changed(RandomIt first, RandomIt last, Compare comp)
     }
 
     return changed;
+}
+
+static Vector2 Reject(Vector2 V, Vector2 N)
+{
+    return V - V.Dot(N) * N;
 }
 
 Platform* PhysicsSystem::CreatePlatform(Vector2 position, Vector2 size, bool isOneway)
@@ -187,6 +192,7 @@ void PhysicsSystem::Update(float delta)
 
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
+
                 if (time)
                     entity->CollisionTime = min(time, entity->CollisionTime);
                 else
@@ -215,8 +221,7 @@ void PhysicsSystem::Update(float delta)
                 Platform* platform = (Platform*)pair.second;
                 if (!entity->CollisionNormal.x && !entity->CollisionNormal.y) continue;
 
-                Vector2 remaining = entity->Velocity - entity->Velocity.Dot(entity->CollisionNormal) * entity->CollisionNormal;
-                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), remaining * delta, tmp);
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Reject(entity->Velocity, entity->CollisionNormal) * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
 
                 entity->CollisionTime = min(time, entity->CollisionTime);
@@ -227,8 +232,7 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        Vector2 remaining = entity->Velocity - entity->Velocity.Dot(entity->CollisionNormal) * entity->CollisionNormal;
-        entity->Position += remaining * entity->CollisionTime * delta;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
     }
 
     // ground check
