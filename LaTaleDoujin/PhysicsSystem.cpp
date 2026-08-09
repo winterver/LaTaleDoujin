@@ -170,7 +170,6 @@ void PhysicsSystem::Update(float delta)
         entity->Velocity += Vector2(0, 1000) * delta;
         entity->CollisionTime = 1.0f;
         entity->CollisionNormal = Vector2();
-        entity->CollisionTime2 = 1.0f;
         entity->IsGrounded = false;
     }
 
@@ -188,23 +187,22 @@ void PhysicsSystem::Update(float delta)
 
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
-                if (entity->CollisionTime > time)
-                {
-                    entity->CollisionTime = time;
+                if (time)
+                    entity->CollisionTime = min(time, entity->CollisionTime);
+                else
                     entity->CollisionNormal = tmp;
-                }
             }
             break;
         }
     }
 
-    // integrate positions
     for (auto& entity : m_Entities)
     {
-        entity->Position += entity->Velocity * entity->CollisionTime * delta;
+        if (entity->CollisionNormal.x || entity->CollisionNormal.y)
+            entity->CollisionTime = 1.0f;
     }
 
-    for (auto& pair : BroadPhase())
+    for (auto& pair : m_Pairs)
     {
         Entity* entity = pair.first;
         float time = 1.0f;
@@ -215,14 +213,13 @@ void PhysicsSystem::Update(float delta)
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-                if (!(1.0f - entity->CollisionTime)) continue;
-                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * (1.0f - entity->CollisionTime) * delta
-                    * Vector2(std::abs(entity->CollisionNormal.y), std::abs(entity->CollisionNormal.x)), tmp);
+                if (!entity->CollisionNormal.x && !entity->CollisionNormal.y) continue;
+
+                Vector2 remaining = entity->Velocity - entity->Velocity.Dot(entity->CollisionNormal) * entity->CollisionNormal;
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), remaining * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
-                if (entity->CollisionTime2 > time)
-                {
-                    entity->CollisionTime2 = time;
-                }
+
+                entity->CollisionTime = min(time, entity->CollisionTime);
             }
             break;
         }
@@ -230,8 +227,8 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        entity->Position += entity->Velocity * entity->CollisionTime2 * (1.0f - entity->CollisionTime) * delta
-            * Vector2(std::abs(entity->CollisionNormal.y), std::abs(entity->CollisionNormal.x));
+        Vector2 remaining = entity->Velocity - entity->Velocity.Dot(entity->CollisionNormal) * entity->CollisionNormal;
+        entity->Position += remaining * entity->CollisionTime * delta;
     }
 
     // ground check

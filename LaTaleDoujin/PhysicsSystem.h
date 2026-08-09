@@ -74,14 +74,12 @@ struct Entity : Body
     Vector2 HalfSize;
     float CollisionTime;
     Vector2 CollisionNormal;
-    float CollisionTime2;
     bool IsGrounded;
 
     Entity(Vector2 position, Vector2 halfSize)
         : Position(position)
         , HalfSize(halfSize)
         , CollisionTime(1.0f)
-        , CollisionTime2(1.0f)
         , IsGrounded(false)
     { }
 
