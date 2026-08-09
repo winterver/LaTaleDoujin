@@ -36,10 +36,10 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     yInvEntry = (vel.y > 0) ? b2.y - (b1.y + b1.h) : (b2.y + b2.h) - b1.y;
     yInvExit  = (vel.y > 0) ? (b2.y + b2.h) - b1.y : b2.y - (b1.y + b1.h);
 
-    xEntry = !std::abs(vel.x) ? -INFINITY : xInvEntry / vel.x;
-    xExit  = !std::abs(vel.x) ?  INFINITY : xInvExit  / vel.x;
-    yEntry = !std::abs(vel.y) ? -INFINITY : yInvEntry / vel.y;
-    yExit  = !std::abs(vel.y) ?  INFINITY : yInvExit  / vel.y;
+    xEntry = std::abs(vel.x) < 1e-5 ? -INFINITY : xInvEntry / vel.x;
+    xExit  = std::abs(vel.x) < 1e-5 ?  INFINITY : xInvExit  / vel.x;
+    yEntry = std::abs(vel.y) < 1e-5 ? -INFINITY : yInvEntry / vel.y;
+    yExit  = std::abs(vel.y) < 1e-5 ?  INFINITY : yInvExit  / vel.y;
 
     entryTime = max(xEntry, yEntry);
     exitTime  = min(xExit, yExit);
@@ -181,15 +181,15 @@ void PhysicsSystem::Update(float delta)
             {
                 Platform* platform = (Platform*)pair.second;
 
-                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * entity->CollisionTime * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway)
                     continue;
             }
             break;
         }
 
-        if (tmp.x) entity->CollisionTime.x = min(time, entity->CollisionTime.x);
-        if (tmp.y) entity->CollisionTime.y = min(time, entity->CollisionTime.y);
+        if (tmp.x) entity->CollisionTime.x *= time;
+        if (tmp.y) entity->CollisionTime.y *= time;
     }
 
     // integrate positions
