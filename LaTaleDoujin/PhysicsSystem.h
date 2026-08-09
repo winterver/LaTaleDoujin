@@ -18,6 +18,12 @@ struct Body {
     virtual float GetEndpointX(bool isStart) = 0;
 };
 
+struct AABB
+{
+    float x, y;
+    float w, h;
+};
+
 struct Platform : Body
 {
     Vector2 Position;
@@ -31,6 +37,11 @@ struct Platform : Body
     { }
 
     BodyType Type() { return BodyType::Platform; }
+
+    AABB GetAABB()
+    {
+        return { Position.x, Position.y, Size.x, Size.y };
+    }
 
     float GetEndpointX(bool isStart)
     {
@@ -62,17 +73,22 @@ struct Entity : Body
     Vector2 Velocity;
     Vector2 HalfSize;
     Vector2 CollisionTime;
-    Body* Ground;
     bool IsGrounded;
 
     Entity(Vector2 position, Vector2 halfSize)
         : Position(position)
         , HalfSize(halfSize)
-        , Ground(nullptr)
         , IsGrounded(false)
     { }
 
     BodyType Type() { return BodyType::Entity; }
+
+    AABB GetAABB()
+    {
+        auto leftTop = Position - HalfSize;
+        auto size = HalfSize * 2;
+        return { leftTop.x, leftTop.y, size.x, size.y };
+    }
 
     float GetEndpointX(bool isStart)
     {
@@ -95,11 +111,13 @@ public:
     Platform* CreatePlatform(Vector2 position, Vector2 size, bool isOneway = false);
     Slope* CreateSlope(Vector2 leftEnd, Vector2 rightEnd);
     Entity* CreateEntity(Vector2 position, Vector2 halfSize);
+    std::vector<std::pair<Entity*, Body*>>& BroadPhase();
     void Update(float delta);
 
 private:
     std::vector<std::unique_ptr<Body>> m_Bodies;
     std::vector<std::unique_ptr<Entity>> m_Entities;
     std::vector<Endpoint> m_Endpoints;
+    std::vector<std::pair<Entity*, Body*>> m_Pairs;
 };
 

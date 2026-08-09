@@ -2,12 +2,6 @@
 #include <algorithm>
 #include <iostream>
 
-struct AABB
-{
-    float x, y;
-    float w, h;
-};
-
 static bool SimpleAABB(const AABB& b1, const AABB& b2) {
     float l = b2.x - (b1.x + b1.w);
     float r = (b2.x + b2.w) - b1.x;
@@ -63,6 +57,29 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     return entryTime;
 }
 
+template <typename RandomIt, typename Compare>
+bool insertion_sort_changed(RandomIt first, RandomIt last, Compare comp)
+{
+    bool changed = false;
+
+    for (auto it = first + 1; it != last; ++it)
+    {
+        auto value = std::move(*it);
+        auto hole = it;
+
+        while (hole != first && comp(value, *(hole - 1)))
+        {
+            *hole = std::move(*(hole - 1));
+            --hole;
+            changed = true;
+        }
+
+        *hole = std::move(value);
+    }
+
+    return changed;
+}
+
 Platform* PhysicsSystem::CreatePlatform(Vector2 position, Vector2 size, bool isOneway)
 {
     auto body = std::make_unique<Platform>(position, size, isOneway);
@@ -99,19 +116,9 @@ Entity* PhysicsSystem::CreateEntity(Vector2 position, Vector2 halfSize)
     return pbody;
 }
 
-void PhysicsSystem::Update(float delta)
+std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
 {
-    // integrate velocities
-    for (auto& entity : m_Entities)
-    {
-        entity->Velocity += Vector2(0, 1000) * delta;
-        entity->CollisionTime = Vector2(1, 1);
-        entity->Ground = nullptr;
-        entity->IsGrounded = false;
-    }
-
-    // broadphase
-    std::sort(
+    bool changed = insertion_sort_changed(
         m_Endpoints.begin(),
         m_Endpoints.end(),
         [](auto& a, auto& b)
@@ -120,8 +127,11 @@ void PhysicsSystem::Update(float delta)
         }
     );
 
-    std::vector<std::pair<Entity*, Body*>> pairs;
+    if (!changed)
+        return m_Pairs;
+
     std::vector<Body*> active;
+    m_Pairs.clear();
 
     for (auto& e : m_Endpoints)
     {
@@ -129,14 +139,13 @@ void PhysicsSystem::Update(float delta)
         {
             for (Body* other : active)
             {
-                if (((e.Body->Type() != BodyType::Entity) && (other->Type() != BodyType::Entity))
-                    || ((e.Body->Type() == BodyType::Entity) && (other->Type() == BodyType::Entity)))
+                if (e.Body->Type() == other->Type())
                     continue;
 
                 Entity* entity = (Entity*)(e.Body->Type() == BodyType::Entity ? e.Body : other);
                 Body* body = e.Body->Type() != BodyType::Entity ? e.Body : other;
 
-                pairs.push_back({ entity, body });
+                m_Pairs.push_back({ entity, body });
             }
             active.push_back(e.Body);
         }
@@ -146,8 +155,20 @@ void PhysicsSystem::Update(float delta)
         }
     }
 
-    // narrowphase
-    for (auto& pair : pairs)
+    return m_Pairs;
+}
+
+void PhysicsSystem::Update(float delta)
+{
+    // integrate velocities
+    for (auto& entity : m_Entities)
+    {
+        entity->Velocity += Vector2(0, 1000) * delta;
+        entity->CollisionTime = Vector2(1, 1);
+        entity->IsGrounded = false;
+    }
+
+    for (auto& pair : BroadPhase())
     {
         Entity* entity = pair.first;
         float time = 1.0f;
@@ -159,72 +180,41 @@ void PhysicsSystem::Update(float delta)
             {
                 Platform* platform = (Platform*)pair.second;
 
-                AABB aabb1{
-                    (entity->Position - entity->HalfSize).x,
-                    (entity->Position - entity->HalfSize).y,
-                    entity->HalfSize.x * 2,
-                    entity->HalfSize.y * 2,
-                };
-
-                AABB aabb2{
-                    platform->Position.x,
-                    platform->Position.y,
-                    platform->Size.x,
-                    platform->Size.y,
-                };
-
-                time = SweptAABB(aabb1, aabb2, entity->Velocity * delta, tmp);
-
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway)
                     continue;
             }
             break;
         }
 
-        if (tmp.x && time < entity->CollisionTime.x) {
-            entity->CollisionTime.x = time;
-        }
-
-        if (tmp.y && time < entity->CollisionTime.y) {
-            entity->CollisionTime.y = time;
-            entity->Ground = pair.second;
-        }
+        if (tmp.x) entity->CollisionTime.x = min(time, entity->CollisionTime.x);
+        if (tmp.y) entity->CollisionTime.y = min(time, entity->CollisionTime.y);
     }
 
     // integrate positions
     for (auto& entity : m_Entities)
     {
         entity->Position += entity->Velocity * entity->CollisionTime * delta;
-        bool stillColliding = false;
+    }
 
-        if (entity->Ground)
+    // ground check
+    for (auto& pair : BroadPhase())
+    {
+        Entity* entity = pair.first;
+        float time = 1.0f;
+        Vector2 tmp;
+
+        switch (pair.second->Type())
         {
-            AABB aabb1{
-                (entity->Position - entity->HalfSize).x,
-                (entity->Position - entity->HalfSize).y+1,
-                entity->HalfSize.x * 2,
-                entity->HalfSize.y * 2,
-            };
+            case BodyType::Platform:
+            {
+                Platform* platform = (Platform*)pair.second;
 
-            AABB aabb2{
-                ((Platform*)entity->Ground)->Position.x,
-                ((Platform*)entity->Ground)->Position.y,
-                ((Platform*)entity->Ground)->Size.x,
-                ((Platform*)entity->Ground)->Size.y,
-            };
-
-            stillColliding = SimpleAABB(aabb1, aabb2);
-        }
-
-        entity->IsGrounded = !entity->CollisionTime.y && stillColliding;
-
-        if (entity->IsGrounded)
-        {
-            entity->Velocity = Vector2();
-        }
-        else
-        {
-            entity->Ground = nullptr;
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
+                entity->IsGrounded |= !time && tmp.y < 0;
+                if (entity->IsGrounded) entity->Velocity = Vector2();
+            }
+            break;
         }
     }
 }
