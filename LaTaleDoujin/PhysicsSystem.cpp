@@ -10,13 +10,16 @@ static bool SimpleAABB(const AABB& b1, const AABB& b2) {
     return !(l >= 0 || r <= 0 || t <= 0 || b >= 0);
 }
 
-static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vector2& normal) {
+static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& _vel, Vector2& normal) {
     float xInvEntry, yInvEntry;
     float xInvExit, yInvExit;
     float xEntry, yEntry;
     float xExit, yExit;
     float entryTime;
     float exitTime;
+
+    // Prevent accidental penetration caused by floating point error
+    Vector2 vel = _vel * 1.001;
 
     AABB broad {
         vel.x > 0 ? b1.x : b1.x + vel.x,
@@ -232,7 +235,8 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
+        // * 0.999: Prevent accidental penetration caused by floating point error
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.999;
     }
 
     // ground check
