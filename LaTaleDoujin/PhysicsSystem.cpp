@@ -235,8 +235,7 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        // * 0.999: Prevent accidental penetration caused by floating point error
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.9999;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
     }
 
     // ground check
