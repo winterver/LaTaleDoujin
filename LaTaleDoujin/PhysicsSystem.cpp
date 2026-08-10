@@ -65,6 +65,44 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     return entryTime;
 }
 
+static float Cross(Vector2 a, Vector2 b)
+{
+    return -(a.x * b.y - a.y * b.x);
+}
+
+static float SweptPointSlope(Vector2 midbottom, Vector2 vel, Vector2 start, Vector2 end, Vector2& normal)
+{
+    Vector2 r = vel;
+    Vector2 s = end - start;
+
+    float rxs = Cross(r, s);
+
+    // Parallel lines (including collinear)
+    if (fabs(rxs) < 1e-6f)
+    {
+        normal = { 0, 0 };
+        return 1.0f;
+    }
+    
+    Vector2 qp = start - midbottom;
+
+    float t = Cross(qp, s) / rxs;
+    float u = Cross(qp, r) / rxs;
+
+    // Intersection is outside either segment
+    if (t < 0.0f || t > 1.0f ||
+        u < 0.0f || u > 1.0f)
+    {
+        normal = { 0, 0 };
+        return 1.0f;
+    }
+
+    normal = { -s.y, s.x };
+    normal.Normalize();
+    normal = normal.Dot(vel) < 0 ? normal : -normal;
+    return (vel*t).LengthSquared() < 1 ? 0 : t;
+}
+
 template <typename RandomIt, typename Compare>
 static bool insertion_sort_changed(RandomIt first, RandomIt last, Compare comp)
 {
@@ -196,17 +234,25 @@ void PhysicsSystem::Update(float delta)
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), entity->Velocity * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
+            }
+            break;
 
-                if (time)
-                    entity->CollisionTime = min(time, entity->CollisionTime);
-                else
-                    entity->CollisionNormal = tmp;
+            case BodyType::Slope:
+            {
+                Slope* slope = (Slope*)pair.second;
+                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
+                time = SweptPointSlope(midbottom, entity->Velocity * delta, slope->LeftEnd, slope->RightEnd, tmp);
+                if (tmp.y >= 0 /*&& slope->IsOneway*/) continue;
             }
             break;
         }
+
+        if (time)
+            entity->CollisionTime = min(time, entity->CollisionTime);
+        else
+            entity->CollisionNormal = tmp;
     }
 
     for (auto& entity : m_Entities)
@@ -221,25 +267,33 @@ void PhysicsSystem::Update(float delta)
         float time = 1.0f;
         Vector2 tmp;
 
+        if (!entity->CollisionNormal.LengthSquared()) continue;
+
         switch (pair.second->Type())
         {
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-                if (!entity->CollisionNormal.LengthSquared()) continue;
-
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Reject(entity->Velocity, entity->CollisionNormal) * delta, tmp);
                 if (tmp.y >= 0 && platform->IsOneway) continue;
+            }
+            break;
 
-                entity->CollisionTime = min(time, entity->CollisionTime);
+            case BodyType::Slope:
+            {
+                Slope* slope = (Slope*)pair.second;
+                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
+                time = SweptPointSlope(midbottom, Reject(entity->Velocity, entity->CollisionNormal) * delta, slope->LeftEnd, slope->RightEnd, tmp);
             }
             break;
         }
+
+        entity->CollisionTime = min(time, entity->CollisionTime);
     }
 
     for (auto& entity : m_Entities)
     {
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.9999;
     }
 
     // ground check
@@ -254,12 +308,20 @@ void PhysicsSystem::Update(float delta)
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Vector2(0, 1), tmp);
-                entity->IsGrounded |= entity->Velocity.y >= 0 && !time && tmp.y < 0;
-                if (entity->IsGrounded) entity->Velocity = Vector2();
+            }
+            break;
+
+            case BodyType::Slope:
+            {
+                Slope* slope = (Slope*)pair.second;
+                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
+                time = SweptPointSlope(midbottom, entity->Velocity * delta, slope->LeftEnd, slope->RightEnd, tmp);
             }
             break;
         }
+
+        entity->IsGrounded |= entity->Velocity.y >= 0 && !time && tmp.y < 0;
+        if (entity->IsGrounded) entity->Velocity = Vector2();
     }
 }

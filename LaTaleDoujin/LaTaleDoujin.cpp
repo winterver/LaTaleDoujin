@@ -43,12 +43,14 @@ bool LaTaleDoujin::Init()
     auto ground2 = m_PhysicsSystem->CreatePlatform(Vector2(800, 660), Vector2(800, 90), true);
     auto ground3 = m_PhysicsSystem->CreatePlatform(Vector2(1200, 50), Vector2(50, 800));
     auto ground4 = m_PhysicsSystem->CreatePlatform(Vector2(-10, 0), Vector2(10, 900));
-    m_Player = m_PhysicsSystem->CreateEntity(Vector2(700, 450), Vector2(32, 75));
+    auto ground5 = m_PhysicsSystem->CreateSlope(Vector2(500, 900), Vector2(800, 660));
+    m_Player = m_PhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
 
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
     m_DebugBatch->PutSolidRect(ground1->Position, ground1->Size);
     m_DebugBatch->PutHollowRect(ground2->Position, ground2->Size, Vector4(0, 0, 1, 1));
     m_DebugBatch->PutHollowRect(ground3->Position, ground3->Size);
+    m_DebugBatch->PutLine(ground5->LeftEnd, ground5->RightEnd);
     m_DebugBatch->UpdateScene();
 
     return true;
@@ -60,12 +62,12 @@ void LaTaleDoujin::UpdateScene()
 
     if (m_Player->IsGrounded && state.Right)
     {
-        m_Player->Velocity.x = 4000000000;
+        m_Player->Velocity.x = 400;
     }
 
     if (m_Player->IsGrounded && state.Left)
     {
-        m_Player->Velocity.x = -4000000000;
+        m_Player->Velocity.x = -400;
     }
 
     if (m_Player->IsGrounded && state.Space)
