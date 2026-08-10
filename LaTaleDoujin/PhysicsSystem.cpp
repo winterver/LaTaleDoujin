@@ -100,7 +100,7 @@ static float SweptPointSlope(Vector2 midbottom, Vector2 vel, Vector2 start, Vect
     normal = { -s.y, s.x };
     normal.Normalize();
     normal = normal.Dot(vel) < 0 ? normal : -normal;
-    return (vel*t).LengthSquared() < 1 ? 0 : t;
+    return (vel*t).LengthSquared() < 2 ? 0 : t;
 }
 
 template <typename RandomIt, typename Compare>
@@ -217,7 +217,8 @@ void PhysicsSystem::Update(float delta)
     // integrate velocities
     for (auto& entity : m_Entities)
     {
-        entity->Velocity += Vector2(0, 1000) * delta;
+        if (!entity->IsGrounded)
+            entity->Velocity += Vector2(0, 1000) * delta;
         entity->CollisionTime = 1.0f;
         entity->CollisionNormal = Vector2();
         entity->IsGrounded = false;
@@ -293,7 +294,7 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.9999;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.999;
     }
 
     // ground check
@@ -308,7 +309,7 @@ void PhysicsSystem::Update(float delta)
             case BodyType::Platform:
             {
                 Platform* platform = (Platform*)pair.second;
-                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Vector2(0, 1), tmp);
+                time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Vector2(0, 100), tmp);
             }
             break;
 
@@ -316,7 +317,7 @@ void PhysicsSystem::Update(float delta)
             {
                 Slope* slope = (Slope*)pair.second;
                 Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
-                time = SweptPointSlope(midbottom, entity->Velocity * delta, slope->LeftEnd, slope->RightEnd, tmp);
+                time = SweptPointSlope(midbottom, Vector2(0, 100), slope->LeftEnd, slope->RightEnd, tmp);
             }
             break;
         }
