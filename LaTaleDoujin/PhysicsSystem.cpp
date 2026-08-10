@@ -100,7 +100,7 @@ static float SweptPointSlope(Vector2 midbottom, Vector2 vel, Vector2 start, Vect
     normal = { -s.y, s.x };
     normal.Normalize();
     normal = normal.Dot(vel) < 0 ? normal : -normal;
-    return (vel*t).LengthSquared() < 2 ? 0 : t;
+    return (vel*t).LengthSquared() < 2 ? 0 : t * 0.999;
 }
 
 template <typename RandomIt, typename Compare>
@@ -294,7 +294,7 @@ void PhysicsSystem::Update(float delta)
 
     for (auto& entity : m_Entities)
     {
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.999;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
     }
 
     // ground check
