@@ -19,7 +19,7 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& _vel, Vect
     float exitTime;
 
     // Prevent accidental penetration caused by floating point error
-    Vector2 vel = _vel * 1.001;
+    Vector2 vel = _vel * 1.0001;
 
     AABB broad {
         vel.x > 0 ? b1.x : b1.x + vel.x,
@@ -236,7 +236,7 @@ void PhysicsSystem::Update(float delta)
     for (auto& entity : m_Entities)
     {
         // * 0.999: Prevent accidental penetration caused by floating point error
-        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.999;
+        entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta * 0.9999;
     }
 
     // ground check
