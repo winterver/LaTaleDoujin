@@ -67,7 +67,7 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
 
 static float Cross(Vector2 a, Vector2 b)
 {
-    return -(a.x * b.y - a.y * b.x);
+    return a.x * b.y - a.y * b.x;
 }
 
 static float SweptPointSlope(Vector2 midbottom, Vector2 vel, Vector2 start, Vector2 end, Vector2& normal)
