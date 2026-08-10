@@ -10,16 +10,13 @@ static bool SimpleAABB(const AABB& b1, const AABB& b2) {
     return !(l >= 0 || r <= 0 || t <= 0 || b >= 0);
 }
 
-static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& _vel, Vector2& normal) {
+static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vector2& normal) {
     float xInvEntry, yInvEntry;
     float xInvExit, yInvExit;
     float xEntry, yEntry;
     float xExit, yExit;
     float entryTime;
     float exitTime;
-
-    // Prevent accidental penetration caused by floating point error
-    Vector2 vel = _vel * 1.0001;
 
     AABB broad {
         vel.x > 0 ? b1.x : b1.x + vel.x,
@@ -38,6 +35,13 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& _vel, Vect
     xInvExit  = (vel.x > 0) ? (b2.x + b2.w) - b1.x : b2.x - (b1.x + b1.w);
     yInvEntry = (vel.y > 0) ? b2.y - (b1.y + b1.h) : (b2.y + b2.h) - b1.y;
     yInvExit  = (vel.y > 0) ? (b2.y + b2.h) - b1.y : b2.y - (b1.y + b1.h);
+
+    // When distance < 1, consider it as zero.
+    // So as to prevent accidental penetration caused by floating point error
+    if (std::abs(xInvEntry) < 1.0f) xInvEntry = 0;
+    if (std::abs(xInvExit) < 1.0f) xInvExit = 0;
+    if (std::abs(yInvEntry) < 1.0f) yInvEntry = 0;
+    if (std::abs(yInvExit) < 1.0f) yInvExit = 0;
 
     xEntry = std::abs(vel.x) < 1e-5f ? -INFINITY : xInvEntry / vel.x;
     xExit  = std::abs(vel.x) < 1e-5f ?  INFINITY : xInvExit  / vel.x;
