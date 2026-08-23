@@ -39,7 +39,7 @@ protected:
 private:
     std::unique_ptr<Keyboard> m_Keyboard;
     std::unique_ptr<Mouse> m_Mouse;
-    Keyboard::State m_LastKeyboardState;
+    Keyboard::State m_LastKeyboardState{};
 
     std::unique_ptr<CommonStates> m_CommonStates;
     std::unique_ptr<SpriteBatch> m_SpriteBatch;
