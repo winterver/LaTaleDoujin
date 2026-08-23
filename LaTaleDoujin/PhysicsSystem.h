@@ -9,7 +9,6 @@ enum class BodyType
 {
     Unknown,
     Platform,
-    Slope,
     Entity,
 };
 
@@ -46,24 +45,6 @@ struct Platform : Body
     float GetEndpointX(bool isStart)
     {
         return Position.x + isStart ? 0 : Size.x;
-    }
-};
-
-struct Slope : Body
-{
-    Vector2 LeftEnd;
-    Vector2 RightEnd;
-
-    Slope(Vector2 leftEnd, Vector2 rightEnd)
-        : LeftEnd(leftEnd)
-        , RightEnd(rightEnd)
-    { }
-
-    BodyType Type() { return BodyType::Slope; }
-
-    float GetEndpointX(bool isStart)
-    {
-        return (isStart ? LeftEnd : RightEnd).x;
     }
 };
 
@@ -111,7 +92,6 @@ class PhysicsSystem
 {
 public:
     Platform* CreatePlatform(Vector2 position, Vector2 size, bool isOneway = false);
-    Slope* CreateSlope(Vector2 leftEnd, Vector2 rightEnd);
     Entity* CreateEntity(Vector2 position, Vector2 halfSize);
     std::vector<std::pair<Entity*, Body*>>& BroadPhase();
     void Update(float delta);

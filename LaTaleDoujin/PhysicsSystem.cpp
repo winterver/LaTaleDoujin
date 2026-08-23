@@ -36,7 +36,7 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
     yInvEntry = (vel.y > 0) ? b2.y - (b1.y + b1.h) : (b2.y + b2.h) - b1.y;
     yInvExit  = (vel.y > 0) ? (b2.y + b2.h) - b1.y : b2.y - (b1.y + b1.h);
 
-    // When distance < 1, consider it as zero.
+    // When distance < 1, make it zero.
     // So as to prevent accidental penetration caused by floating point error
     if (std::abs(xInvEntry) < 1.0f) xInvEntry = 0;
     if (std::abs(xInvExit) < 1.0f) xInvExit = 0;
@@ -63,44 +63,6 @@ static float SweptAABB(const AABB& b1, const AABB& b2, const Vector2& vel, Vecto
         normal = { 0.0f, yInvEntry < 0 ? 1.0f : -1.0f };
 
     return entryTime;
-}
-
-static float Cross(Vector2 a, Vector2 b)
-{
-    return a.x * b.y - a.y * b.x;
-}
-
-static float SweptPointSlope(Vector2 midbottom, Vector2 vel, Vector2 start, Vector2 end, Vector2& normal)
-{
-    Vector2 r = vel;
-    Vector2 s = end - start;
-
-    float rxs = Cross(r, s);
-
-    // Parallel lines (including collinear)
-    if (fabs(rxs) < 1e-6f)
-    {
-        normal = { 0, 0 };
-        return 1.0f;
-    }
-    
-    Vector2 qp = start - midbottom;
-
-    float t = Cross(qp, s) / rxs;
-    float u = Cross(qp, r) / rxs;
-
-    // Intersection is outside either segment
-    if (t < 0.0f || t > 1.0f ||
-        u < 0.0f || u > 1.0f)
-    {
-        normal = { 0, 0 };
-        return 1.0f;
-    }
-
-    normal = { -s.y, s.x };
-    normal.Normalize();
-    normal = normal.Dot(vel) < 0 ? normal : -normal;
-    return (vel*t).LengthSquared() < 2 ? 0 : t * 0.999;
 }
 
 template <typename RandomIt, typename Compare>
@@ -135,18 +97,6 @@ Platform* PhysicsSystem::CreatePlatform(Vector2 position, Vector2 size, bool isO
 {
     auto body = std::make_unique<Platform>(position, size, isOneway);
     Platform* pbody = body.get();
-
-    m_Bodies.push_back(std::move(body));
-    m_Endpoints.push_back(Endpoint{ true, pbody });
-    m_Endpoints.push_back(Endpoint{ false, pbody });
-
-    return pbody;
-}
-
-Slope* PhysicsSystem::CreateSlope(Vector2 leftEnd, Vector2 rightEnd)
-{
-    auto body = std::make_unique<Slope>(leftEnd, rightEnd);
-    Slope* pbody = body.get();
 
     m_Bodies.push_back(std::move(body));
     m_Endpoints.push_back(Endpoint{ true, pbody });
@@ -239,15 +189,6 @@ void PhysicsSystem::Update(float delta)
                 if (tmp.y >= 0 && platform->IsOneway) continue;
             }
             break;
-
-            case BodyType::Slope:
-            {
-                Slope* slope = (Slope*)pair.second;
-                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
-                time = SweptPointSlope(midbottom, entity->Velocity * delta, slope->LeftEnd, slope->RightEnd, tmp);
-                if (tmp.y >= 0 /*&& slope->IsOneway*/) continue;
-            }
-            break;
         }
 
         if (time)
@@ -279,14 +220,6 @@ void PhysicsSystem::Update(float delta)
                 if (tmp.y >= 0 && platform->IsOneway) continue;
             }
             break;
-
-            case BodyType::Slope:
-            {
-                Slope* slope = (Slope*)pair.second;
-                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
-                time = SweptPointSlope(midbottom, Reject(entity->Velocity, entity->CollisionNormal) * delta, slope->LeftEnd, slope->RightEnd, tmp);
-            }
-            break;
         }
 
         entity->CollisionTime = min(time, entity->CollisionTime);
@@ -310,14 +243,6 @@ void PhysicsSystem::Update(float delta)
             {
                 Platform* platform = (Platform*)pair.second;
                 time = SweptAABB(entity->GetAABB(), platform->GetAABB(), Vector2(0, 100), tmp);
-            }
-            break;
-
-            case BodyType::Slope:
-            {
-                Slope* slope = (Slope*)pair.second;
-                Vector2 midbottom = entity->Position + Vector2(0, entity->HalfSize.y);
-                time = SweptPointSlope(midbottom, Vector2(0, 100), slope->LeftEnd, slope->RightEnd, tmp);
             }
             break;
         }
