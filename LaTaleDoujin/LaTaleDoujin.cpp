@@ -3,9 +3,6 @@
 #include "PhysicsSystem.h"
 #include "Player.h"
 #include "DebugBatch.h"
-#include <SimpleMath.h>
-#include <SpriteBatch.h>
-#include <CommonStates.h>
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
@@ -28,6 +25,7 @@ bool LaTaleDoujin::Init()
     SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE) & ~(WS_SIZEBOX|WS_MAXIMIZEBOX));
 
     m_Keyboard = std::make_unique<Keyboard>();
+    m_Tracker = std::make_unique<Tracker>();
     m_Mouse = std::make_unique<Mouse>();
     m_Mouse->SetWindow(m_hWnd);
 
@@ -58,17 +56,14 @@ bool LaTaleDoujin::Init()
 void LaTaleDoujin::UpdateScene()
 {
     auto state = m_Keyboard->GetState();
+    m_Tracker->Update(state);
 
     m_Player->Update();
-    if (state.Right) m_Player->MoveRight();
-    if (state.Left) m_Player->MoveLeft();
-    if (!m_LastKeyboardState.Space && state.Space)
-    {
-        m_Player->Jump(state.Down);
-    }
+    if (state.IsKeyDown(Keys::Right)) { m_Player->MoveRight(); }
+    if (state.IsKeyDown(Keys::Left)) { m_Player->MoveLeft(); }
+    if (m_Tracker->IsKeyPressed(Keys::Space)) { m_Player->Jump(state.Down); }
 
     m_PhysicsSystem->Update(m_Timer.DeltaTime());
-    m_LastKeyboardState = state;
 }
 
 void LaTaleDoujin::DrawScene()

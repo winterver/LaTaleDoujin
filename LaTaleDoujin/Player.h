@@ -23,5 +23,7 @@ private:
     Entity* m_Entity;
     int m_NumJumps;
     bool m_WasGrounded;
+    bool m_WantLeft;
+    bool m_WantRight;
 };
 
