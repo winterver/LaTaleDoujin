@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "D3D11Application.h"
+#include <Keyboard.h>
+#include <Mouse.h>
 #include <memory>
 
 namespace DirectX
@@ -9,8 +11,6 @@ namespace DirectX
         class CommonStates;
         class SpriteBatch;
     }
-    class Keyboard;
-    class Mouse;
 }
 
 using DirectX::CommonStates;
@@ -19,7 +19,7 @@ using DirectX::Keyboard;
 using DirectX::Mouse;
 
 class PhysicsSystem;
-struct Entity;
+class Player;
 class DebugBatch;
 
 class LaTaleDoujin : public D3D11Application
@@ -39,12 +39,13 @@ protected:
 private:
     std::unique_ptr<Keyboard> m_Keyboard;
     std::unique_ptr<Mouse> m_Mouse;
+    Keyboard::State m_LastKeyboardState;
 
     std::unique_ptr<CommonStates> m_CommonStates;
     std::unique_ptr<SpriteBatch> m_SpriteBatch;
     ComPtr<ID3D11ShaderResourceView> m_IrisTexture;
 
     std::unique_ptr<PhysicsSystem> m_PhysicsSystem;
-    Entity* m_Player = nullptr;
+    std::unique_ptr<Player> m_Player;
     std::unique_ptr<DebugBatch> m_DebugBatch;
 };

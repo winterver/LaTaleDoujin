@@ -1,11 +1,10 @@
 ﻿#include "LaTaleDoujin.h"
 #include "ImageLoader.h"
 #include "PhysicsSystem.h"
+#include "Player.h"
 #include "DebugBatch.h"
 #include <SimpleMath.h>
 #include <SpriteBatch.h>
-#include <Keyboard.h>
-#include <Mouse.h>
 #include <CommonStates.h>
 
 using namespace DirectX::SimpleMath;
@@ -43,7 +42,9 @@ bool LaTaleDoujin::Init()
     auto ground2 = m_PhysicsSystem->CreatePlatform(Vector2(800, 660), Vector2(800, 90), true);
     auto ground3 = m_PhysicsSystem->CreatePlatform(Vector2(1200, 50), Vector2(50, 800));
     auto ground4 = m_PhysicsSystem->CreatePlatform(Vector2(-10, 0), Vector2(10, 900));
-    m_Player = m_PhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
+
+    auto playerEntity = m_PhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
+    m_Player = std::make_unique<Player>(playerEntity);
 
     m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
     m_DebugBatch->PutSolidRect(ground1->Position, ground1->Size);
@@ -58,22 +59,16 @@ void LaTaleDoujin::UpdateScene()
 {
     auto state = m_Keyboard->GetState();
 
-    if (m_Player->IsGrounded && state.Right)
+    m_Player->Update();
+    if (state.Right) m_Player->MoveRight();
+    if (state.Left) m_Player->MoveLeft();
+    if (!m_LastKeyboardState.Space && state.Space)
     {
-        m_Player->Velocity.x = 400;
-    }
-
-    if (m_Player->IsGrounded && state.Left)
-    {
-        m_Player->Velocity.x = -400;
-    }
-
-    if (m_Player->IsGrounded && state.Space)
-    {
-        m_Player->Velocity.y = -600;
+        m_Player->Jump(state.Down);
     }
 
     m_PhysicsSystem->Update(m_Timer.DeltaTime());
+    m_LastKeyboardState = state;
 }
 
 void LaTaleDoujin::DrawScene()
@@ -93,8 +88,10 @@ void LaTaleDoujin::DrawScene()
     float x = cx - (cx * cos(a) - cy * sin(a));
     float y = cy - (cx * sin(a) + cy * cos(a));
 
+    auto player = m_Player->GetEntity();
+
     auto view = XMMatrixLookToLH(
-        m_Player->Position - Vector2(800, 450) + Vector3(x, y, 0),
+        player->Position - Vector2(800, 450) + Vector3(x, y, 0),
         Vector3(0, 0, 1),
         Vector3(sin(-a), cos(-a), 0));
 
@@ -115,7 +112,7 @@ void LaTaleDoujin::DrawScene()
     m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
     m_pContext->RSSetState(m_CommonStates->CullNone());
     m_DebugBatch->DrawScene(view);
-    m_DebugBatch->DrawHollowSprite(m_Player->Position - m_Player->HalfSize, m_Player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
+    m_DebugBatch->DrawHollowSprite(player->Position - player->HalfSize, player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
 
     m_pSwapChain->Present(0, 0);
 }
