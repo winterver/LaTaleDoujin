@@ -133,7 +133,7 @@
   <ItemGroup>
     <ClCompile Include="D3D11Application.cpp" />
     <ClCompile Include="DebugBatch.cpp" />
-    <ClCompile Include="ImageLoader.cpp" />
+    <Text Include="ImageLoader.cpp" />
     <ClCompile Include="LaTaleDoujin.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicsSystem.cpp" />
@@ -148,7 +148,7 @@
   <ItemGroup>
     <ClInclude Include="D3D11Application.h" />
     <ClInclude Include="DebugBatch.h" />
-    <ClInclude Include="ImageLoader.h" />
+    <Text Include="ImageLoader.h" />
     <ClInclude Include="PhysicsSystem.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Utility.h" />

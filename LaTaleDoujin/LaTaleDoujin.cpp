@@ -1,8 +1,8 @@
 ﻿#include "LaTaleDoujin.h"
-#include "ImageLoader.h"
 #include "PhysicsSystem.h"
 #include "Player.h"
 #include "DebugBatch.h"
+#include <WICTextureLoader.h>
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
@@ -33,7 +33,7 @@ bool LaTaleDoujin::Init()
     m_SpriteBatch = std::make_unique<SpriteBatch>(m_pContext.Get());
 
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-    CreateTextureFromFile(m_pDevice.Get(), nullptr, L"C:/Data/Develop/archive/LaTaleDoujin_CSharp_SDL/LaTaleDoujin/resources/IRIS.PNG", &m_IrisTexture);
+    CreateWICTextureFromFile(m_pDevice.Get(), nullptr, L"../Resource/IRIS.PNG", nullptr, &m_IrisTexture);
 
     m_PhysicsSystem = std::make_unique<PhysicsSystem>();
     auto ground1 = m_PhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
