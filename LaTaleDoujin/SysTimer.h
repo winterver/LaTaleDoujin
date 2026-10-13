@@ -11,7 +11,7 @@ public:
     INT64 GetTime();
 
     void SetFramerate(int framerate);
-    void Reset();
+    void Sync();
     void Tick();
 
 private:

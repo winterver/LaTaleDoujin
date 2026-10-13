@@ -1,42 +1,29 @@
 ﻿#pragma once
-#include "D3D11Application.h"
-#include <SimpleMath.h>
-#include <SpriteBatch.h>
-#include <Keyboard.h>
-#include <Mouse.h>
+#include "D3D11Application1.h"
 #include <CommonStates.h>
+#include <SpriteBatch.h>
+#include "Utility.h"
 #include <memory>
 
 using DirectX::CommonStates;
 using DirectX::SpriteBatch;
-using DirectX::Keyboard;
-using DirectX::Mouse;
-using Tracker = Keyboard::KeyboardStateTracker;
-using Keys = Keyboard::Keys;
 
 class PhysicsSystem;
 class Player;
 class DebugBatch;
 
-class LaTaleDoujin : public D3D11Application
+class LaTaleDoujin : public D3D11Application1
 {
 public:
     LaTaleDoujin();
     ~LaTaleDoujin();
 
-    bool Init();
-
 protected:
-    void UpdateScene();
-    void DrawScene();
-
-    LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    void InitScene() override;
+    void UpdateScene() override;
+    void DrawScene() override;
 
 private:
-    std::unique_ptr<Keyboard> m_Keyboard;
-    std::unique_ptr<Tracker> m_Tracker;
-    std::unique_ptr<Mouse> m_Mouse;
-
     std::unique_ptr<CommonStates> m_CommonStates;
     std::unique_ptr<SpriteBatch> m_SpriteBatch;
     ComPtr<ID3D11ShaderResourceView> m_IrisTexture;

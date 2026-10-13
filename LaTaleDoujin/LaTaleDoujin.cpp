@@ -1,39 +1,29 @@
 ﻿#include "LaTaleDoujin.h"
+#include <SimpleMath.h>
+#include <Keyboard.h>
+#include <WICTextureLoader.h>
+#include "SysTimer.h"
 #include "PhysicsSystem.h"
 #include "Player.h"
 #include "DebugBatch.h"
-#include <WICTextureLoader.h>
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
+using Keys = Keyboard::Keys;
 
 LaTaleDoujin::LaTaleDoujin()
-    : D3D11Application(L"La Tale Doujin", 1600, 900)
-{
-    m_Enable4xMsaa = true;
-    m_EnablePause = false;
-}
+    : D3D11Application1(L"La Tale Doujin", 1600, 900)
+{ }
 
 LaTaleDoujin::~LaTaleDoujin() = default;
 
-bool LaTaleDoujin::Init()
+void LaTaleDoujin::InitScene()
 {
-    bool val = D3D11Application::Init();
-    if (!val) return false;
-
-    // Disable window resizing
-    SetWindowLong(m_hWnd, GWL_STYLE, GetWindowLong(m_hWnd, GWL_STYLE) & ~(WS_SIZEBOX|WS_MAXIMIZEBOX));
-
-    m_Keyboard = std::make_unique<Keyboard>();
-    m_Tracker = std::make_unique<Tracker>();
-    m_Mouse = std::make_unique<Mouse>();
-    m_Mouse->SetWindow(m_hWnd);
-
-    m_CommonStates = std::make_unique<CommonStates>(m_pDevice.Get());
-    m_SpriteBatch = std::make_unique<SpriteBatch>(m_pContext.Get());
+    m_CommonStates = std::make_unique<CommonStates>(GetDevice());
+    m_SpriteBatch = std::make_unique<SpriteBatch>(GetContext());
 
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-    CreateWICTextureFromFile(m_pDevice.Get(), nullptr, L"../Resource/IRIS.PNG", nullptr, &m_IrisTexture);
+    ThrowIfFailed(CreateWICTextureFromFile(GetDevice(), nullptr, L"../Resource/IRIS.PNG", nullptr, &m_IrisTexture));
 
     m_PhysicsSystem = std::make_unique<PhysicsSystem>();
     auto ground1 = m_PhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
@@ -44,41 +34,33 @@ bool LaTaleDoujin::Init()
     auto playerEntity = m_PhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
     m_Player = std::make_unique<Player>(playerEntity);
 
-    m_DebugBatch = std::make_unique<DebugBatch>(m_pDevice.Get());
+    m_DebugBatch = std::make_unique<DebugBatch>(GetDevice());
     m_DebugBatch->PutSolidRect(ground1->Position, ground1->Size);
     m_DebugBatch->PutHollowRect(ground2->Position, ground2->Size, Vector4(0, 0, 1, 1));
     m_DebugBatch->PutHollowRect(ground3->Position, ground3->Size);
     m_DebugBatch->UpdateScene();
-
-    return true;
 }
 
 void LaTaleDoujin::UpdateScene()
 {
-    auto state = m_Keyboard->GetState();
-    m_Tracker->Update(state);
-
     m_Player->Update();
-    if (state.IsKeyDown(Keys::Right)) { m_Player->MoveRight(); }
-    if (state.IsKeyDown(Keys::Left)) { m_Player->MoveLeft(); }
-    if (m_Tracker->IsKeyPressed(Keys::Space)) { m_Player->Jump(state.Down); }
+    if (IsKeyDown(Keys::Right)) { m_Player->MoveRight(); }
+    if (IsKeyDown(Keys::Left)) { m_Player->MoveLeft(); }
+    if (IsKeyHit(Keys::Space)) { m_Player->Jump(IsKeyDown(Keys::Down)); }
 
-    m_PhysicsSystem->Update(m_Timer.DeltaTime());
+    m_PhysicsSystem->Update(GetTimer()->DeltaTime());
 }
 
 void LaTaleDoujin::DrawScene()
 {
-    m_pContext->ClearRenderTargetView(m_pRenderTargetView.Get(), Colors::CornflowerBlue);
-    m_pContext->ClearDepthStencilView(m_pDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-    auto keys = m_Keyboard->GetState();
-    auto buttons = m_Mouse->GetState();
+    GetContext()->ClearRenderTargetView(GetRenderTargetView(), Colors::CornflowerBlue);
+    GetContext()->ClearDepthStencilView(GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     static float a = 0;
     //a += m_Timer.DeltaTime();
 
-    float cx = m_Width / 2;
-    float cy = m_Height / 2;
+    float cx = 1600 / 2;
+    float cy = 900 / 2;
 
     float x = cx - (cx * cos(a) - cy * sin(a));
     float y = cy - (cx * sin(a) + cy * cos(a));
@@ -103,46 +85,11 @@ void LaTaleDoujin::DrawScene()
 
     m_SpriteBatch->End();
 
-    m_pContext->OMSetBlendState(m_CommonStates->Opaque(), nullptr, 0xFFFFFFFF);
-    m_pContext->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
-    m_pContext->RSSetState(m_CommonStates->CullNone());
+    GetContext()->OMSetBlendState(m_CommonStates->Opaque(), nullptr, 0xFFFFFFFF);
+    GetContext()->OMSetDepthStencilState(m_CommonStates->DepthDefault(), 0);
+    GetContext()->RSSetState(m_CommonStates->CullNone());
     m_DebugBatch->DrawScene(view);
     m_DebugBatch->DrawHollowSprite(player->Position - player->HalfSize, player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
 
-    m_pSwapChain->Present(0, 0);
-}
-
-LRESULT LaTaleDoujin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch (msg)
-    {
-    case WM_ACTIVATE:
-    case WM_ACTIVATEAPP:
-        Keyboard::ProcessMessage(msg, wParam, lParam);
-        Mouse::ProcessMessage(msg, wParam, lParam);
-        break;
-
-    case WM_KEYUP:
-    case WM_KEYDOWN:
-    case WM_SYSKEYUP:
-    case WM_SYSKEYDOWN:
-        Keyboard::ProcessMessage(msg, wParam, lParam);
-        break;
-
-    case WM_INPUT:
-    case WM_MOUSEMOVE:
-    case WM_MOUSEHOVER:
-    case WM_LBUTTONDOWN:
-    case WM_LBUTTONUP:
-    case WM_RBUTTONDOWN:
-    case WM_RBUTTONUP:
-    case WM_MBUTTONDOWN:
-    case WM_MBUTTONUP:
-    case WM_MOUSEWHEEL:
-    case WM_XBUTTONDOWN:
-    case WM_XBUTTONUP:
-        Mouse::ProcessMessage(msg, wParam, lParam);
-        break;
-    }
-    return D3D11Application::WndProc(hWnd, msg, wParam, lParam);
+    GetSwapChain()->Present(0, 0);
 }

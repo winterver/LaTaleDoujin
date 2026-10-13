@@ -1,6 +1,13 @@
 ﻿#include "LaTaleDoujin.h"
 #include <crtdbg.h>
 
+extern "C"
+{
+    // Prioritize NVIDIA and AMD GPUs over others.
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 0x00000001;
+}
+
 #if defined(_DEBUG)
 int main() {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

@@ -44,7 +44,7 @@ int D3D11Application::Run()
                 if (recover)
                 {
                     recover = false;
-                    m_Timer.Reset();
+                    m_Timer.Sync();
                 }
                 m_Timer.Tick();
                 UpdateScene();
@@ -73,7 +73,7 @@ void D3D11Application::OnResize()
 
     ComPtr<ID3D11Texture2D> backBuffer;
     m_pSwapChain->ResizeBuffers(1, m_Width, m_Height, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-    m_pSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(backBuffer.GetAddressOf()));
+    m_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&backBuffer));
     m_pDevice->CreateRenderTargetView(backBuffer.Get(), nullptr, &m_pRenderTargetView);
 
     D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -339,7 +339,7 @@ bool D3D11Application::InitDirect3D()
 
     m_pDevice.As(&dxgiDevice);
     dxgiDevice->GetAdapter(&dxgiAdapter);
-    dxgiAdapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(dxgiFactory1.GetAddressOf()));
+    dxgiAdapter->GetParent(IID_PPV_ARGS(&dxgiFactory1));
 
     dxgiFactory1.As(&dxgiFactory2);
     if (dxgiFactory2)

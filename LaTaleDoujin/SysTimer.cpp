@@ -35,10 +35,10 @@ void SysTimer::SetFramerate(int framerate)
     else
         m_Interval = 0;
 
-    Reset();
+    Sync();
 }
 
-void SysTimer::Reset()
+void SysTimer::Sync()
 {
     m_LastTime = GetTime();
     m_TotalTime = m_LastTime;
