@@ -1,8 +1,7 @@
 ﻿#pragma once
-#include "D3D11Application1.h"
+#include "D3D11Application2.h"
 #include <CommonStates.h>
 #include <SpriteBatch.h>
-#include "Utility.h"
 
 using DirectX::CommonStates;
 using DirectX::SpriteBatch;
@@ -11,7 +10,7 @@ class PhysicsSystem;
 class Player;
 class DebugBatch;
 
-class LaTaleDoujin : public D3D11Application1
+class LaTaleDoujin : public D3D11Application
 {
 public:
     LaTaleDoujin();

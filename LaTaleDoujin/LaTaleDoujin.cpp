@@ -1,29 +1,26 @@
 ﻿#include "LaTaleDoujin.h"
 #include <SimpleMath.h>
-#include <Keyboard.h>
 #include <WICTextureLoader.h>
-#include "SysTimer.h"
 #include "PhysicsSystem.h"
 #include "Player.h"
 #include "DebugBatch.h"
 
 using namespace DirectX::SimpleMath;
 using namespace DirectX;
-using Keys = Keyboard::Keys;
 
 LaTaleDoujin::LaTaleDoujin()
-    : D3D11Application1(L"La Tale Doujin", 1600, 900)
+    : D3D11Application(L"La Tale Doujin", 1600, 900)
 { }
 
 LaTaleDoujin::~LaTaleDoujin() = default;
 
 void LaTaleDoujin::InitScene()
 {
-    mCommonStates = make_unique<CommonStates>(GetDevice());
-    mSpriteBatch = make_unique<SpriteBatch>(GetContext());
+    mCommonStates = make_unique<CommonStates>(mDevice.Get());
+    mSpriteBatch = make_unique<SpriteBatch>(mContext.Get());
 
     ThrowIfFailed(CoInitializeEx(nullptr, COINIT_MULTITHREADED));
-    ThrowIfFailed(CreateWICTextureFromFile(GetDevice(), nullptr, L"../Resource/IRIS.PNG", nullptr, &mIrisTexture));
+    ThrowIfFailed(CreateWICTextureFromFile(mDevice.Get(), nullptr, L"../Resource/IRIS.PNG", nullptr, &mIrisTexture));
 
     mPhysicsSystem = make_unique<PhysicsSystem>();
     auto ground1 = mPhysicsSystem->CreatePlatform(Vector2(0, 825), Vector2(1600, 50));
@@ -34,7 +31,7 @@ void LaTaleDoujin::InitScene()
     auto playerEntity = mPhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
     mPlayer = make_unique<Player>(playerEntity);
 
-    mDebugBatch = make_unique<DebugBatch>(GetDevice());
+    mDebugBatch = make_unique<DebugBatch>(mDevice.Get());
     mDebugBatch->PutSolidRect(ground1->Position, ground1->Size);
     mDebugBatch->PutHollowRect(ground2->Position, ground2->Size, Vector4(0, 0, 1, 1));
     mDebugBatch->PutHollowRect(ground3->Position, ground3->Size);
@@ -44,17 +41,17 @@ void LaTaleDoujin::InitScene()
 void LaTaleDoujin::UpdateScene()
 {
     mPlayer->Update();
-    if (IsKeyDown(Keys::Right)) { mPlayer->MoveRight(); }
-    if (IsKeyDown(Keys::Left)) { mPlayer->MoveLeft(); }
-    if (IsKeyHit(Keys::Space)) { mPlayer->Jump(IsKeyDown(Keys::Down)); }
+    if (IsKeyDown(Key::Right)) { mPlayer->MoveRight(); }
+    if (IsKeyDown(Key::Left)) { mPlayer->MoveLeft(); }
+    if (IsKeyHit(Key::Space)) { mPlayer->Jump(IsKeyDown(Key::Down)); }
 
-    mPhysicsSystem->Update(GetTimer()->DeltaTime());
+    mPhysicsSystem->Update(mTimer.DeltaTime());
 }
 
 void LaTaleDoujin::DrawScene()
 {
-    GetContext()->ClearRenderTargetView(GetRenderTargetView(), Colors::CornflowerBlue);
-    GetContext()->ClearDepthStencilView(GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    mContext->ClearRenderTargetView(mRenderTargetView.Get(), Colors::CornflowerBlue);
+    mContext->ClearDepthStencilView(mDepthStencilView.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     static float a = 0;
     //a += mTimer.DeltaTime();
@@ -85,11 +82,11 @@ void LaTaleDoujin::DrawScene()
 
     mSpriteBatch->End();
 
-    GetContext()->OMSetBlendState(mCommonStates->Opaque(), nullptr, 0xFFFFFFFF);
-    GetContext()->OMSetDepthStencilState(mCommonStates->DepthDefault(), 0);
-    GetContext()->RSSetState(mCommonStates->CullNone());
+    mContext->OMSetBlendState(mCommonStates->Opaque(), nullptr, 0xFFFFFFFF);
+    mContext->OMSetDepthStencilState(mCommonStates->DepthDefault(), 0);
+    mContext->RSSetState(mCommonStates->CullNone());
     mDebugBatch->DrawScene(view);
     mDebugBatch->DrawHollowSprite(player->Position - player->HalfSize, player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
 
-    GetSwapChain()->Present(0, 0);
+    mSwapChain->Present(0, 0);
 }
