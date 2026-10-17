@@ -13,8 +13,11 @@
 #include <wrl/client.h>
 #include <Windows.h>
 #include <stdexcept>
+#include <memory>
 
 using Microsoft::WRL::ComPtr;
+using std::unique_ptr;
+using std::make_unique;
 
 inline std::string HrToString(HRESULT hr)
 {

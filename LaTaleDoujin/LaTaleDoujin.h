@@ -3,7 +3,6 @@
 #include <CommonStates.h>
 #include <SpriteBatch.h>
 #include "Utility.h"
-#include <memory>
 
 using DirectX::CommonStates;
 using DirectX::SpriteBatch;
@@ -24,11 +23,11 @@ protected:
     void DrawScene() override;
 
 private:
-    std::unique_ptr<CommonStates> m_CommonStates;
-    std::unique_ptr<SpriteBatch> m_SpriteBatch;
-    ComPtr<ID3D11ShaderResourceView> m_IrisTexture;
+    unique_ptr<CommonStates> mCommonStates;
+    unique_ptr<SpriteBatch> mSpriteBatch;
+    ComPtr<ID3D11ShaderResourceView> mIrisTexture;
 
-    std::unique_ptr<PhysicsSystem> m_PhysicsSystem;
-    std::unique_ptr<Player> m_Player;
-    std::unique_ptr<DebugBatch> m_DebugBatch;
+    unique_ptr<PhysicsSystem> mPhysicsSystem;
+    unique_ptr<Player> mPlayer;
+    unique_ptr<DebugBatch> mDebugBatch;
 };
