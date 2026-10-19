@@ -2,14 +2,14 @@
 #include "PhysicsSystem.h"
 
 Player::Player(Entity* entity)
-    : m_MaxJumps(2)
-    , m_Speed(400)
-    , m_JumpForce(600)
-    , m_Entity(entity)
-    , m_NumJumps(0)
-    , m_WasGrounded(false)
-    , m_WantLeft(false)
-    , m_WantRight(false)
+    : mMaxJumps(2)
+    , mSpeed(400)
+    , mJumpForce(600)
+    , mEntity(entity)
+    , mNumJumps(0)
+    , mWasGrounded(false)
+    , mWantLeft(false)
+    , mWantRight(false)
 {
 }
 
@@ -17,55 +17,55 @@ Player::~Player() = default;
 
 void Player::Update()
 {
-    if (m_Entity->IsGrounded)
+    if (mEntity->IsGrounded)
     {
-        m_NumJumps = 0;
+        mNumJumps = 0;
     }
-    m_WasGrounded = m_Entity->IsGrounded;
-    m_WantLeft = false;
-    m_WantRight = false;
+    mWasGrounded = mEntity->IsGrounded;
+    mWantLeft = false;
+    mWantRight = false;
 }
 
 void Player::MoveLeft()
 {
-    if (m_Entity->IsGrounded)
+    if (mEntity->IsGrounded)
     {
-        m_Entity->Velocity.x = -m_Speed;
+        mEntity->Velocity.x = -mSpeed;
     }
-    m_WantLeft = true;
+    mWantLeft = true;
 }
 
 void Player::MoveRight()
 {
-    if (m_Entity->IsGrounded)
+    if (mEntity->IsGrounded)
     {
-        m_Entity->Velocity.x = +m_Speed;
+        mEntity->Velocity.x = +mSpeed;
     }
-    m_WantRight = true;
+    mWantRight = true;
 }
 
 void Player::Jump(bool zerox)
 {
-    if (m_NumJumps < m_MaxJumps)
+    if (mNumJumps < mMaxJumps)
     {
-        m_Entity->Velocity.y = -m_JumpForce;
+        mEntity->Velocity.y = -mJumpForce;
         if (zerox)
         {
-            if (m_NumJumps)
-                m_Entity->Velocity.x = 0;
+            if (mNumJumps)
+                mEntity->Velocity.x = 0;
         }
         else
         {
             int dir = 0;
-            if (m_WantRight) dir = 1;
-            if (m_WantLeft) dir = -1;
-            m_Entity->Velocity.x = dir * m_Speed;
+            if (mWantRight) dir = 1;
+            if (mWantLeft) dir = -1;
+            mEntity->Velocity.x = dir * mSpeed;
         }
-        m_NumJumps++;
+        mNumJumps++;
     }
 }
 
 const Entity* Player::GetEntity()
 {
-    return m_Entity;
+    return mEntity;
 }

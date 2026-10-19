@@ -98,9 +98,9 @@ Platform* PhysicsSystem::CreatePlatform(Vector2 position, Vector2 size, bool isO
     auto body = std::make_unique<Platform>(position, size, isOneway);
     Platform* pbody = body.get();
 
-    m_Bodies.push_back(std::move(body));
-    m_Endpoints.push_back(Endpoint{ true, pbody });
-    m_Endpoints.push_back(Endpoint{ false, pbody });
+    mBodies.push_back(std::move(body));
+    mEndpoints.push_back(Endpoint{ true, pbody });
+    mEndpoints.push_back(Endpoint{ false, pbody });
 
     return pbody;
 }
@@ -110,9 +110,9 @@ Entity* PhysicsSystem::CreateEntity(Vector2 position, Vector2 halfSize)
     auto body = std::make_unique<Entity>(position, halfSize);
     Entity* pbody = body.get();
 
-    m_Entities.push_back(std::move(body));
-    m_Endpoints.push_back(Endpoint{ true, pbody });
-    m_Endpoints.push_back(Endpoint{ false, pbody });
+    mEntities.push_back(std::move(body));
+    mEndpoints.push_back(Endpoint{ true, pbody });
+    mEndpoints.push_back(Endpoint{ false, pbody });
 
     return pbody;
 }
@@ -120,8 +120,8 @@ Entity* PhysicsSystem::CreateEntity(Vector2 position, Vector2 halfSize)
 std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
 {
     bool changed = insertion_sort_changed(
-        m_Endpoints.begin(),
-        m_Endpoints.end(),
+        mEndpoints.begin(),
+        mEndpoints.end(),
         [](auto& a, auto& b)
         {
             return a.GetX() < b.GetX();
@@ -129,12 +129,12 @@ std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
     );
 
     if (!changed)
-        return m_Pairs;
+        return mPairs;
 
     std::vector<Body*> active;
-    m_Pairs.clear();
+    mPairs.clear();
 
-    for (auto& e : m_Endpoints)
+    for (auto& e : mEndpoints)
     {
         if (e.IsStart)
         {
@@ -149,7 +149,7 @@ std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
                 Entity* entity = (Entity*)(eIsEntity ? e.Body : other);
                 Body* body = eIsEntity ? other : e.Body;
 
-                m_Pairs.push_back({ entity, body });
+                mPairs.push_back({ entity, body });
             }
             active.push_back(e.Body);
         }
@@ -159,13 +159,13 @@ std::vector<std::pair<Entity*, Body*>>& PhysicsSystem::BroadPhase()
         }
     }
 
-    return m_Pairs;
+    return mPairs;
 }
 
 void PhysicsSystem::Update(float delta)
 {
     // integrate velocities
-    for (auto& entity : m_Entities)
+    for (auto& entity : mEntities)
     {
         if (!entity->IsGrounded)
             entity->Velocity += Vector2(0, 1000) * delta;
@@ -197,13 +197,13 @@ void PhysicsSystem::Update(float delta)
             entity->CollisionNormal = tmp;
     }
 
-    for (auto& entity : m_Entities)
+    for (auto& entity : mEntities)
     {
         if (entity->CollisionNormal.LengthSquared())
             entity->CollisionTime = 1.0f;
     }
 
-    for (auto& pair : m_Pairs)
+    for (auto& pair : mPairs)
     {
         Entity* entity = pair.first;
         float time = 1.0f;
@@ -225,7 +225,7 @@ void PhysicsSystem::Update(float delta)
         entity->CollisionTime = min(time, entity->CollisionTime);
     }
 
-    for (auto& entity : m_Entities)
+    for (auto& entity : mEntities)
     {
         entity->Position += Reject(entity->Velocity, entity->CollisionNormal) * entity->CollisionTime * delta;
     }

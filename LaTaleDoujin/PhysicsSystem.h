@@ -97,9 +97,9 @@ public:
     void Update(float delta);
 
 private:
-    std::vector<std::unique_ptr<Body>> m_Bodies;
-    std::vector<std::unique_ptr<Entity>> m_Entities;
-    std::vector<Endpoint> m_Endpoints;
-    std::vector<std::pair<Entity*, Body*>> m_Pairs;
+    std::vector<std::unique_ptr<Body>> mBodies;
+    std::vector<std::unique_ptr<Entity>> mEntities;
+    std::vector<Endpoint> mEndpoints;
+    std::vector<std::pair<Entity*, Body*>> mPairs;
 };
 

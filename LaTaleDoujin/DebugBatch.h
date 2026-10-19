@@ -25,18 +25,18 @@ private:
     void Prepare(Matrix transform, Vector4 color);
 
 private:
-    ComPtr<ID3D11Device> m_pDevice;
-    ComPtr<ID3D11DeviceContext> m_pContext;
-    ComPtr<ID3D11VertexShader> m_VertexShader;
-    ComPtr<ID3D11PixelShader> m_PixelShader;
-    ComPtr<ID3D11InputLayout> m_Layout;
+    ComPtr<ID3D11Device> mDevice;
+    ComPtr<ID3D11DeviceContext> mContext;
+    ComPtr<ID3D11VertexShader> mVertexShader;
+    ComPtr<ID3D11PixelShader> mPixelShader;
+    ComPtr<ID3D11InputLayout> mLayout;
 
-    struct { Matrix MVP; Vector4 Color; } m_Constants;
-    ComPtr<ID3D11Buffer> m_ConstantBuffer;
+    struct { Matrix MVP; Vector4 Color; } mConstants;
+    ComPtr<ID3D11Buffer> mConstantBuffer;
 
-    std::vector<float> m_Lines;
-    std::vector<float> m_Solids;
-    ComPtr<ID3D11Buffer> m_LineBuffer;
-    ComPtr<ID3D11Buffer> m_SolidBuffer;
+    std::vector<float> mLines;
+    std::vector<float> mSolids;
+    ComPtr<ID3D11Buffer> mLineBuffer;
+    ComPtr<ID3D11Buffer> mSolidBuffer;
 };
 

@@ -15,15 +15,15 @@ public:
     const Entity* GetEntity();
 
 public:
-    int m_MaxJumps;
-    int m_Speed;
-    int m_JumpForce;
+    int mMaxJumps;
+    int mSpeed;
+    int mJumpForce;
 
 private:
-    Entity* m_Entity;
-    int m_NumJumps;
-    bool m_WasGrounded;
-    bool m_WantLeft;
-    bool m_WantRight;
+    Entity* mEntity;
+    int mNumJumps;
+    bool mWasGrounded;
+    bool mWantLeft;
+    bool mWantRight;
 };
 

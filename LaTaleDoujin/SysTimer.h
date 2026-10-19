@@ -15,10 +15,10 @@ public:
     void Tick();
 
 private:
-    HANDLE m_Timer;
-    INT64 m_TotalTime = 0;
-    INT64 m_LastTime = 0;
-    INT64 m_Interval = 0;
-    float m_DeltaTime = 0;
+    HANDLE mTimer;
+    INT64 mTotalTime = 0;
+    INT64 mLastTime = 0;
+    INT64 mInterval = 0;
+    float mDeltaTime = 0;
 };
 

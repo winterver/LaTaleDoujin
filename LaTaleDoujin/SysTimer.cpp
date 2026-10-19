@@ -3,18 +3,18 @@
 
 SysTimer::SysTimer()
 {
-    m_Timer = CreateWaitableTimerEx(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);;
+    mTimer = CreateWaitableTimerEx(NULL, NULL, CREATE_WAITABLE_TIMER_HIGH_RESOLUTION, TIMER_ALL_ACCESS);;
     SetFramerate(60);
 }
 
 SysTimer::~SysTimer()
 {
-    CloseHandle(m_Timer);
+    CloseHandle(mTimer);
 }
 
 float SysTimer::DeltaTime()
 {
-    return m_DeltaTime;
+    return mDeltaTime;
 }
 
 INT64 SysTimer::GetTime()
@@ -31,29 +31,29 @@ INT64 SysTimer::GetTime()
 void SysTimer::SetFramerate(int framerate)
 {
     if (framerate > 0)
-        m_Interval = INT64(1e9) / framerate;
+        mInterval = INT64(1e9) / framerate;
     else
-        m_Interval = 0;
+        mInterval = 0;
 
     Sync();
 }
 
 void SysTimer::Sync()
 {
-    m_LastTime = GetTime();
-    m_TotalTime = m_LastTime;
+    mLastTime = GetTime();
+    mTotalTime = mLastTime;
 }
 
 void SysTimer::Tick()
 {
-    m_TotalTime += m_Interval;
+    mTotalTime += mInterval;
 
     while (true)
     {
-        INT64 remaining = m_TotalTime - GetTime();
+        INT64 remaining = mTotalTime - GetTime();
 
         if (remaining <= 2000000) {
-            while (GetTime() < m_TotalTime)
+            while (GetTime() < mTotalTime)
                 std::this_thread::yield();
             break;
         }
@@ -63,11 +63,11 @@ void SysTimer::Tick()
         LARGE_INTEGER due;
         due.QuadPart = -hus; // Unit of SetWaitableTimer is 100ns. And the value should be negative.
 
-        if (SetWaitableTimerEx(m_Timer, &due, 0, NULL, NULL, NULL, 0))
-            WaitForSingleObject(m_Timer, INFINITE);
+        if (SetWaitableTimerEx(mTimer, &due, 0, NULL, NULL, NULL, 0))
+            WaitForSingleObject(mTimer, INFINITE);
     }
 
     INT64 now = GetTime();
-    m_DeltaTime = float((now - m_LastTime) / 1e9);
-    m_LastTime = now;
+    mDeltaTime = float((now - mLastTime) / 1e9);
+    mLastTime = now;
 }
