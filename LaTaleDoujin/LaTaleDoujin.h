@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "D3D11Application2.h"
+#include "D3D11Application.h"
 #include <CommonStates.h>
 #include <SpriteBatch.h>
 

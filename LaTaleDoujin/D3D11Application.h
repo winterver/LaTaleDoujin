@@ -3,49 +3,58 @@
 #include <d3d11_1.h>
 #include "Utility.h"
 #include "SysTimer.h"
+#include <Keyboard.h>
+#include <Mouse.h>
+
+using DirectX::Keyboard;
+using DirectX::Mouse;
+using Key = Keyboard::Keys;
+using Tracker = Keyboard::KeyboardStateTracker;
 
 class D3D11Application
 {
 public:
     D3D11Application(const TCHAR* title, int width, int height);
-    virtual ~D3D11Application();
+    ~D3D11Application();
 
-    virtual bool Init();
-    virtual int Run();
+    bool Init();
+    int Run();
 
 protected:
-    virtual void OnResize();
+    virtual void InitScene();
     virtual void UpdateScene();
     virtual void DrawScene();
 
-    static LRESULT _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-    virtual LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    bool IsKeyDown(Key key);
+    bool IsKeyHit(Key key);
 
+private:
     bool InitWindow();
     bool InitDirect3D();
+    void OnResize();
 
 protected:
-    HWND m_hWnd = nullptr;
-    bool m_AppPaused = false;
-    bool m_Minimized = false;
-    bool m_Maximized = false;
-    bool m_Resizing = false;
-    bool m_Enable4xMsaa = false;
-    UINT m_4xMsaaQuality = 0;
-    bool m_EnablePause = true;
+    const TCHAR* mTitle;
+    int mWidth;
+    int mHeight;
 
-    SysTimer m_Timer;
+    HWND mhWnd = nullptr;
+    UINT m4xMsaaQuality = 0;
+    bool mEnable4xMsaa = true;
 
-    ComPtr<ID3D11Device> m_pDevice;
-    ComPtr<ID3D11DeviceContext> m_pContext;
-    ComPtr<IDXGISwapChain> m_pSwapChain;
+    SysTimer mTimer;
 
-    ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
-    ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
-    ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
-    D3D11_VIEWPORT m_Viewport = { };
+    ComPtr<ID3D11Device> mDevice;
+    ComPtr<ID3D11DeviceContext> mContext;
+    ComPtr<IDXGISwapChain> mSwapChain;
 
-    const TCHAR* m_Title;
-    int m_Width;
-    int m_Height;
+    ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
+    ComPtr<ID3D11RenderTargetView> mRenderTargetView;
+    ComPtr<ID3D11DepthStencilView> mDepthStencilView;
+    D3D11_VIEWPORT mViewport = { };
+
+    unique_ptr<Keyboard> mKeyboard;
+    unique_ptr<Tracker> mTracker;
+    unique_ptr<Mouse> mMouse;
 };
+

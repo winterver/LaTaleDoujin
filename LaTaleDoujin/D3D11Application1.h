@@ -1,45 +1,51 @@
 ﻿#pragma once
-#include <memory>
-#include <tchar.h>
+#include <Windows.h>
+#include <d3d11_1.h>
+#include "Utility.h"
+#include "SysTimer.h"
 
-class SysTimer;
-struct ID3D11Device;
-struct ID3D11DeviceContext;
-struct IDXGISwapChain;
-struct ID3D11Texture2D;
-struct ID3D11RenderTargetView;
-struct ID3D11DepthStencilView;
-
-class D3D11Application1
+class D3D11Application
 {
 public:
-    D3D11Application1(const TCHAR* title, int width, int height);
-    ~D3D11Application1();
+    D3D11Application(const TCHAR* title, int width, int height);
+    virtual ~D3D11Application();
 
-    bool Init();
-    int Run();
+    virtual bool Init();
+    virtual int Run();
 
 protected:
-    virtual void InitScene();
+    virtual void OnResize();
     virtual void UpdateScene();
     virtual void DrawScene();
 
+    static LRESULT _WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+    virtual LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+    bool InitWindow();
+    bool InitDirect3D();
+
 protected:
-    // real type of unsigned char is DirectX::Keyboard::Keys
-    bool IsKeyDown(unsigned char key);   // true while the key is pressed
-    bool IsKeyHit(unsigned char key);    // true at the frame where the key goes from "released" to "pressed"
+    HWND m_hWnd = nullptr;
+    bool m_AppPaused = false;
+    bool m_Minimized = false;
+    bool m_Maximized = false;
+    bool m_Resizing = false;
+    bool m_Enable4xMsaa = false;
+    UINT m_4xMsaaQuality = 0;
+    bool m_EnablePause = true;
 
-    SysTimer* GetTimer();
+    SysTimer m_Timer;
 
-    ID3D11Device* GetDevice();
-    ID3D11DeviceContext* GetContext();
-    IDXGISwapChain* GetSwapChain();
+    ComPtr<ID3D11Device> m_pDevice;
+    ComPtr<ID3D11DeviceContext> m_pContext;
+    ComPtr<IDXGISwapChain> m_pSwapChain;
 
-    ID3D11Texture2D* GetDepthStencilBuffer();
-    ID3D11RenderTargetView* GetRenderTargetView();
-    ID3D11DepthStencilView* GetDepthStencilView();
+    ComPtr<ID3D11Texture2D> m_pDepthStencilBuffer;
+    ComPtr<ID3D11RenderTargetView> m_pRenderTargetView;
+    ComPtr<ID3D11DepthStencilView> m_pDepthStencilView;
+    D3D11_VIEWPORT m_Viewport = { };
 
-private:
-    struct Impl;
-    std::unique_ptr<Impl> mImpl;
+    const TCHAR* m_Title;
+    int m_Width;
+    int m_Height;
 };
