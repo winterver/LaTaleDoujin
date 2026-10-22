@@ -20,13 +20,13 @@ public:
     bool Init();
     int Run();
 
+    bool IsKeyDown(Key key);
+    bool IsKeyHit(Key key);
+
 protected:
     virtual void InitScene();
     virtual void UpdateScene();
     virtual void DrawScene();
-
-    bool IsKeyDown(Key key);
-    bool IsKeyHit(Key key);
 
 private:
     bool InitWindow();

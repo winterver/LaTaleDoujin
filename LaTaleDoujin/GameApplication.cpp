@@ -27,12 +27,14 @@ void GameApplication::UpdateScene()
         }
     }
 
-    mCurrentScene->UpdateScene();
+    if (mCurrentScene)
+        mCurrentScene->UpdateScene();
 }
 
 void GameApplication::DrawScene()
 {
-    mCurrentScene->DrawScene();
+    if (mCurrentScene)
+        mCurrentScene->DrawScene();
 }
 
 void GameApplication::ChangeScene(unique_ptr<GameScene> scene)

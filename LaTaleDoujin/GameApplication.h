@@ -12,6 +12,9 @@ public:
     SysTimer* GetTimer() { return &mTimer; }
     ID3D11Device* GetDevice() { return mDevice.Get(); }
     ID3D11DeviceContext* GetContext() { return mContext.Get(); }
+    IDXGISwapChain* GetSwapChain() { return mSwapChain.Get(); }
+    ID3D11RenderTargetView* GetRenderTargetView() { return mRenderTargetView.Get(); }
+    ID3D11DepthStencilView* GetDepthStencilView() { return mDepthStencilView.Get(); }
 
 protected:
     virtual void InitScene() override;

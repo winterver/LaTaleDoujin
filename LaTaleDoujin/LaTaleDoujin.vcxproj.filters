@@ -27,9 +27,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LaTaleDoujin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PhysicsSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -53,9 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="LaTaleDoujin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -98,6 +92,12 @@
       <Filter>Unused</Filter>
     </None>
     <None Include="ImageLoader.h">
+      <Filter>Unused</Filter>
+    </None>
+    <None Include="LaTaleDoujin1.cpp">
+      <Filter>Unused</Filter>
+    </None>
+    <None Include="LaTaleDoujin1.h">
       <Filter>Unused</Filter>
     </None>
   </ItemGroup>

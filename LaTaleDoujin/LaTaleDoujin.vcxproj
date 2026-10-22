@@ -138,7 +138,7 @@
     <None Include="ImageLoader.cpp" />
     <ClCompile Include="GameApplication.cpp" />
     <ClCompile Include="GameScene.cpp" />
-    <ClCompile Include="LaTaleDoujin.cpp" />
+    <None Include="LaTaleDoujin1.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicsSystem.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -160,7 +160,7 @@
     <ClInclude Include="PhysicsSystem.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Utility.h" />
-    <ClInclude Include="LaTaleDoujin.h" />
+    <None Include="LaTaleDoujin1.h" />
     <ClInclude Include="SysTimer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

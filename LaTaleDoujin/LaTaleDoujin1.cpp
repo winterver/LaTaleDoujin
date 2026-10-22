@@ -1,4 +1,4 @@
-﻿#include "LaTaleDoujin.h"
+﻿#include "LaTaleDoujin1.h"
 #include <SimpleMath.h>
 #include <WICTextureLoader.h>
 #include "PhysicsSystem.h"

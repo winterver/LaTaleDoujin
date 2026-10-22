@@ -15,6 +15,9 @@ GameScene::GameScene(GameApplication* game)
     , mTimer(game->GetTimer())
     , mDevice(game->GetDevice())
     , mContext(game->GetContext())
+    , mSwapChain(game->GetSwapChain())
+    , mRenderTargetView(game->GetRenderTargetView())
+    , mDepthStencilView(game->GetDepthStencilView())
     , mStatus(Uninitialized)
 {
 }
@@ -25,6 +28,7 @@ void GameScene::StepInit()
 {
     if (mStatus == Uninitialized)
     {
+        InitScene();
         mIndex = mTasks.begin();
         mStatus = Initializing;
     }

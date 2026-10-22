@@ -31,6 +31,9 @@ protected:
     SysTimer* mTimer;
     ID3D11Device* mDevice;
     ID3D11DeviceContext* mContext;
+    IDXGISwapChain* mSwapChain;
+    ID3D11RenderTargetView* mRenderTargetView;
+    ID3D11DepthStencilView* mDepthStencilView;
 
     unique_ptr<CommonStates> mCommonStates;
     unique_ptr<SpriteBatch> mSpriteBatch;
