@@ -16,18 +16,18 @@
     <Filter Include="Unused">
       <UniqueIdentifier>{3f12327e-2bad-4bca-a418-c9b5b9f90714}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Wrapper">
+      <UniqueIdentifier>{dc622e43-49b4-4f4f-9e8f-c1099f00a16c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Wrapper">
+      <UniqueIdentifier>{bd2bc903-741b-45b0-9ea8-5883ddfefd9f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SysTimer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="LaTaleDoujin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugBatch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PhysicsSystem.cpp">
@@ -37,20 +37,26 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="D3D11Application.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugBatch.cpp">
+      <Filter>Source Files\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="SysTimer.cpp">
+      <Filter>Source Files\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="GameApplication.cpp">
+      <Filter>Source Files\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="GameScene.cpp">
+      <Filter>Source Files\Wrapper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SysTimer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LaTaleDoujin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugBatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PhysicsSystem.h">
@@ -60,7 +66,19 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D11Application.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugBatch.h">
+      <Filter>Header Files\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="SysTimer.h">
+      <Filter>Header Files\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="GameApplication.h">
+      <Filter>Header Files\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="GameScene.h">
+      <Filter>Header Files\Wrapper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

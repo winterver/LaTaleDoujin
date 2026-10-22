@@ -3,15 +3,15 @@
 #include <CommonStates.h>
 #include <SpriteBatch.h>
 
-using DirectX::CommonStates;
-using DirectX::SpriteBatch;
-
 class PhysicsSystem;
 class Player;
 class DebugBatch;
 
 class LaTaleDoujin : public D3D11Application
 {
+    using CommonStates = DirectX::CommonStates;
+    using SpriteBatch = DirectX::SpriteBatch;
+
 public:
     LaTaleDoujin();
     ~LaTaleDoujin();

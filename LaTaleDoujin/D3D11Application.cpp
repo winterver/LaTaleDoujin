@@ -1,6 +1,8 @@
 ﻿#include "D3D11Application.h"
 #include <cassert>
 
+using namespace DirectX;
+
 static LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     switch (msg)

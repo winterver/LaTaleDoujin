@@ -6,13 +6,13 @@
 #include <Keyboard.h>
 #include <Mouse.h>
 
-using DirectX::Keyboard;
-using DirectX::Mouse;
-using Key = Keyboard::Keys;
-using Tracker = Keyboard::KeyboardStateTracker;
-
 class D3D11Application
 {
+    using Keyboard = DirectX::Keyboard;
+    using Mouse = DirectX::Mouse;
+    using Key = Keyboard::Keys;
+    using Tracker = Keyboard::KeyboardStateTracker;
+
 public:
     D3D11Application(const TCHAR* title, int width, int height);
     ~D3D11Application();

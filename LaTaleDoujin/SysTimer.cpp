@@ -38,6 +38,11 @@ void SysTimer::SetFramerate(int framerate)
     Sync();
 }
 
+INT64 SysTimer::GetInterval()
+{
+    return mInterval;
+}
+
 void SysTimer::Sync()
 {
     mLastTime = GetTime();

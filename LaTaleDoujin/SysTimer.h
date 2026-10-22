@@ -11,6 +11,8 @@ public:
     INT64 GetTime();
 
     void SetFramerate(int framerate);
+    INT64 GetInterval();
+
     void Sync();
     void Tick();
 
