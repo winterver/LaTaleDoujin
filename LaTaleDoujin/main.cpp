@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "DebugBatch.h"
 
+#include <iostream>
+
 using namespace DirectX;
 using Key = Keyboard::Keys;
 
@@ -34,7 +36,7 @@ protected:
         auto playerEntity = mPhysicsSystem->CreateEntity(Vector2(200, 450), Vector2(32, 75));
         mPlayer = make_unique<Player>(playerEntity);
 
-        mDebugBatch = make_unique<DebugBatch>(mDevice);
+        mDebugBatch = make_unique<DebugBatch>(Device());
         mDebugBatch->PutSolidRect(ground1->Position, ground1->Size);
         mDebugBatch->PutHollowRect(ground2->Position, ground2->Size, Vector4(0, 0, 1, 1));
         mDebugBatch->PutHollowRect(ground3->Position, ground3->Size);
@@ -52,15 +54,15 @@ protected:
         if (mGame->IsKeyDown(Key::Left)) { mPlayer->MoveLeft(); }
         if (mGame->IsKeyHit(Key::Space)) { mPlayer->Jump(mGame->IsKeyDown(Key::Down)); }
 
-        mPhysicsSystem->Update(mTimer->DeltaTime());
+        mPhysicsSystem->Update(Timer()->DeltaTime());
     }
 
     void DrawScene() override
     {
         GameScene::DrawScene();
 
-        mContext->ClearRenderTargetView(mRenderTargetView, Colors::CornflowerBlue);
-        mContext->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+        Context()->ClearRenderTargetView(RenderTargetView(), Colors::CornflowerBlue);
+        Context()->ClearDepthStencilView(DepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
         static float a = 0;
         //a += mTimer.DeltaTime();
@@ -91,13 +93,13 @@ protected:
 
         mSpriteBatch->End();
 
-        mContext->OMSetBlendState(mCommonStates->Opaque(), nullptr, 0xFFFFFFFF);
-        mContext->OMSetDepthStencilState(mCommonStates->DepthDefault(), 0);
-        mContext->RSSetState(mCommonStates->CullNone());
+        Context()->OMSetBlendState(mCommonStates->Opaque(), nullptr, 0xFFFFFFFF);
+        Context()->OMSetDepthStencilState(mCommonStates->DepthDefault(), 0);
+        Context()->RSSetState(mCommonStates->CullNone());
         mDebugBatch->DrawScene(view);
         mDebugBatch->DrawHollowSprite(player->Position - player->HalfSize, player->HalfSize * 2, Vector4(1, 1, 1, 1), 0, view);
 
-        mSwapChain->Present(0, 0);
+        SwapChain()->Present(0, 0);
     }
 };
 

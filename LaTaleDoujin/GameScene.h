@@ -28,12 +28,12 @@ protected:
 
 protected:
     GameApplication* mGame;
-    SysTimer* mTimer;
-    ID3D11Device* mDevice;
-    ID3D11DeviceContext* mContext;
-    IDXGISwapChain* mSwapChain;
-    ID3D11RenderTargetView* mRenderTargetView;
-    ID3D11DepthStencilView* mDepthStencilView;
+    PROPERTY(Timer, mGame->Timer())
+    PROPERTY(Device, mGame->Device())
+    PROPERTY(Context, mGame->Context())
+    PROPERTY(SwapChain, mGame->SwapChain())
+    PROPERTY(RenderTargetView, mGame->RenderTargetView())
+    PROPERTY(DepthStencilView, mGame->DepthStencilView())
 
     unique_ptr<CommonStates> mCommonStates;
     unique_ptr<SpriteBatch> mSpriteBatch;

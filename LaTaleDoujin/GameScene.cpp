@@ -12,12 +12,6 @@ enum GameScene::InitStatus
 
 GameScene::GameScene(GameApplication* game)
     : mGame(game)
-    , mTimer(game->GetTimer())
-    , mDevice(game->GetDevice())
-    , mContext(game->GetContext())
-    , mSwapChain(game->GetSwapChain())
-    , mRenderTargetView(game->GetRenderTargetView())
-    , mDepthStencilView(game->GetDepthStencilView())
     , mStatus(Uninitialized)
 {
 }
@@ -36,8 +30,8 @@ void GameScene::StepInit()
     if (mStatus == Initializing)
     {
         // Use half of interval (target frame length) to load assets
-        INT64 due = mTimer->GetInterval() / 2 + mTimer->GetTime();
-        while (mIndex < mTasks.end() && mTimer->GetTime() < due)
+        INT64 due = Timer()->GetInterval() / 2 + Timer()->GetTime();
+        while (mIndex < mTasks.end() && Timer()->GetTime() < due)
         {
             (*mIndex)();
             mIndex++;
@@ -73,14 +67,14 @@ float GameScene::GetInitProgress()
 void GameScene::LoadTexture(ID3D11ShaderResourceView** texture, const TCHAR* path, bool mipmap)
 {
     mTasks.push_back([=] {
-        ThrowIfFailed(CreateWICTextureFromFile(mDevice, mipmap ? mContext : nullptr, path, nullptr, texture));
+        ThrowIfFailed(CreateWICTextureFromFile(Device(), mipmap ? Context() : nullptr, path, nullptr, texture));
     });
 }
 
 void GameScene::InitScene()
 {
-    mCommonStates = make_unique<CommonStates>(mDevice);
-    mSpriteBatch = make_unique<SpriteBatch>(mContext);
+    mCommonStates = make_unique<CommonStates>(Device());
+    mSpriteBatch = make_unique<SpriteBatch>(Context());
 }
 
 void GameScene::UpdateScene()

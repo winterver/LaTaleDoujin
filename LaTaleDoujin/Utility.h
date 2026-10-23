@@ -15,6 +15,8 @@
 #include <stdexcept>
 #include <memory>
 
+#define PROPERTY(name, expr) auto name() { return expr; }
+
 using Microsoft::WRL::ComPtr;
 using std::unique_ptr;
 using std::make_unique;

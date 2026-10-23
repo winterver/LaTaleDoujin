@@ -9,12 +9,12 @@ public:
     GameApplication(const TCHAR* title, int width, int height);
     virtual ~GameApplication();
 
-    SysTimer* GetTimer() { return &mTimer; }
-    ID3D11Device* GetDevice() { return mDevice.Get(); }
-    ID3D11DeviceContext* GetContext() { return mContext.Get(); }
-    IDXGISwapChain* GetSwapChain() { return mSwapChain.Get(); }
-    ID3D11RenderTargetView* GetRenderTargetView() { return mRenderTargetView.Get(); }
-    ID3D11DepthStencilView* GetDepthStencilView() { return mDepthStencilView.Get(); }
+    PROPERTY(Timer, &mTimer)
+    PROPERTY(Device, mDevice.Get())
+    PROPERTY(Context, mContext.Get())
+    PROPERTY(SwapChain, mSwapChain.Get())
+    PROPERTY(RenderTargetView, mRenderTargetView.Get())
+    PROPERTY(DepthStencilView, mDepthStencilView.Get())
 
 protected:
     virtual void InitScene() override;
