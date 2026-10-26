@@ -274,6 +274,7 @@ bool D3D11Application::InitDirect3D()
     dxgiFactory1->MakeWindowAssociation(mhWnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);
 
     OnResize();
+    OnResize();
 
     mKeyboard = make_unique<Keyboard>();
     mTracker = make_unique<Tracker>();
@@ -290,7 +291,6 @@ void D3D11Application::OnResize()
     assert(mSwapChain);
 
     mRenderTargetView.Reset();
-    mDepthStencilBuffer.Reset();
     mDepthStencilView.Reset();
 
     ComPtr<ID3D11Texture2D> backBuffer;
@@ -322,8 +322,9 @@ void D3D11Application::OnResize()
     depthStencilDesc.CPUAccessFlags = 0;
     depthStencilDesc.MiscFlags = 0;
 
-    mDevice->CreateTexture2D(&depthStencilDesc, nullptr, &mDepthStencilBuffer);
-    mDevice->CreateDepthStencilView(mDepthStencilBuffer.Get(), nullptr, &mDepthStencilView);
+    ComPtr<ID3D11Texture2D> depthStencilBuffer;
+    mDevice->CreateTexture2D(&depthStencilDesc, nullptr, &depthStencilBuffer);
+    mDevice->CreateDepthStencilView(depthStencilBuffer.Get(), nullptr, &mDepthStencilView);
 
     // ComPtr::operator& => reference_count--, equivalent to ComPtr::ReleaseAndGetAddressOf
     mContext->OMSetRenderTargets(1, mRenderTargetView.GetAddressOf(), mDepthStencilView.Get());

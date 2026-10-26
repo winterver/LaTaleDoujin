@@ -17,13 +17,19 @@ void GameApplication::UpdateScene()
 {
     if (mNextScene)
     {
-        if (mNextScene->IsInitIncomplete())
+        if (!mLoader)
         {
-            mNextScene->StepInit();
+            mLoader = make_unique<std::thread>([&] {
+                mNextScene->InitScene();
+                mLoaderFinished = true;
+            });
         }
-        else
+        else if (mLoaderFinished)
         {
             mCurrentScene = std::move(mNextScene);
+            mLoader->detach();
+            mLoader.reset();
+            mLoaderFinished = false;
         }
     }
 

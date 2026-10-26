@@ -23,6 +23,13 @@ public:
     bool IsKeyDown(Key key);
     bool IsKeyHit(Key key);
 
+	PROPERTY(Timer, &mTimer)
+    PROPERTY(Device, mDevice.Get())
+    PROPERTY(Context, mContext.Get())
+    PROPERTY(SwapChain, mSwapChain.Get())
+    PROPERTY(RenderTargetView, mRenderTargetView.Get())
+    PROPERTY(DepthStencilView, mDepthStencilView.Get())
+
 protected:
     virtual void InitScene();
     virtual void UpdateScene();
@@ -48,7 +55,6 @@ protected:
     ComPtr<ID3D11DeviceContext> mContext;
     ComPtr<IDXGISwapChain> mSwapChain;
 
-    ComPtr<ID3D11Texture2D> mDepthStencilBuffer;
     ComPtr<ID3D11RenderTargetView> mRenderTargetView;
     ComPtr<ID3D11DepthStencilView> mDepthStencilView;
     D3D11_VIEWPORT mViewport = { };

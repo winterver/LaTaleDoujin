@@ -2,8 +2,6 @@
 #include "GameApplication.h"
 #include <CommonStates.h>
 #include <SpriteBatch.h>
-#include <functional>
-#include <vector>
 
 class GameScene
 {
@@ -14,12 +12,6 @@ class GameScene
 public:
     GameScene(GameApplication* game);
     virtual ~GameScene();
-
-    void StepInit();
-    bool IsInitIncomplete();
-    float GetInitProgress();
-
-    void LoadTexture(ID3D11ShaderResourceView** texture, const TCHAR* path, bool mipmap = false);
 
 protected:
     virtual void InitScene();
@@ -37,12 +29,5 @@ protected:
 
     unique_ptr<CommonStates> mCommonStates;
     unique_ptr<SpriteBatch> mSpriteBatch;
-
-private:
-    enum InitStatus;
-    InitStatus mStatus;
-
-    std::vector<std::function<void()>> mTasks;
-    decltype(mTasks)::iterator mIndex;
 };
 

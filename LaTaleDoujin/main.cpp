@@ -1,6 +1,7 @@
 ﻿#include "GameApplication.h"
 #include "GameScene.h"
 #include <tchar.h>
+#include <WICTextureLoader.h>
 
 #include "PhysicsSystem.h"
 #include "Player.h"
@@ -42,7 +43,7 @@ protected:
         mDebugBatch->PutHollowRect(ground3->Position, ground3->Size);
         mDebugBatch->UpdateScene();
 
-        LoadTexture(&mIrisTexture, _T("../Resource/IRIS.PNG"));
+        ThrowIfFailed(CreateWICTextureFromFile(Device(), nullptr, _T("../Resource/IRIS.PNG"), nullptr, &mIrisTexture));
     }
 
     void UpdateScene() override

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "D3D11Application.h"
+#include <thread>
 
 class GameScene;
 
@@ -8,13 +9,6 @@ class GameApplication : public D3D11Application
 public:
     GameApplication(const TCHAR* title, int width, int height);
     virtual ~GameApplication();
-
-    PROPERTY(Timer, &mTimer)
-    PROPERTY(Device, mDevice.Get())
-    PROPERTY(Context, mContext.Get())
-    PROPERTY(SwapChain, mSwapChain.Get())
-    PROPERTY(RenderTargetView, mRenderTargetView.Get())
-    PROPERTY(DepthStencilView, mDepthStencilView.Get())
 
 protected:
     virtual void InitScene() override;
@@ -26,5 +20,7 @@ protected:
 private:
     unique_ptr<GameScene> mCurrentScene;
     unique_ptr<GameScene> mNextScene;
+    unique_ptr<std::thread> mLoader;
+    bool mLoaderFinished{};
 };
 
