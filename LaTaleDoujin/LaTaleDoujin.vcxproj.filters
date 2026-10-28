@@ -50,9 +50,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Utility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PhysicsSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,6 +69,9 @@
       <Filter>Header Files\Wrapper</Filter>
     </ClInclude>
     <ClInclude Include="GameScene.h">
+      <Filter>Header Files\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
       <Filter>Header Files\Wrapper</Filter>
     </ClInclude>
   </ItemGroup>

@@ -124,16 +124,12 @@ bool D3D11Application::InitWindow()
     int width = rect.right - rect.left;
     int height = rect.bottom - rect.top;
 
-    mhWnd = CreateWindow(L"D3D11Application", mTitle, WS_OVERLAPPEDWINDOW,
-        (GetSystemMetrics(SM_CXSCREEN) - width)/2,
-        (GetSystemMetrics(SM_CYSCREEN) - height)/2,
+    mhWnd = CreateWindow(L"D3D11Application", mTitle, WS_OVERLAPPEDWINDOW & ~(WS_SIZEBOX|WS_MAXIMIZEBOX),
+        (GetSystemMetrics(SM_CXSCREEN) - width)/2, (GetSystemMetrics(SM_CYSCREEN) - height)/2,
         width, height, 0, 0, wc.hInstance, this);
 
     if (!mhWnd)
         return false;
-
-    // Disable window resizing
-    SetWindowLong(mhWnd, GWL_STYLE, GetWindowLong(mhWnd, GWL_STYLE) & ~(WS_SIZEBOX|WS_MAXIMIZEBOX));
 
     ShowWindow(mhWnd, SW_SHOW);
     UpdateWindow(mhWnd);
@@ -273,7 +269,6 @@ bool D3D11Application::InitDirect3D()
     // Disable Alt+Enter toggle fullscreen.
     dxgiFactory1->MakeWindowAssociation(mhWnd, DXGI_MWA_NO_ALT_ENTER | DXGI_MWA_NO_WINDOW_CHANGES);
 
-    OnResize();
     OnResize();
 
     mKeyboard = make_unique<Keyboard>();

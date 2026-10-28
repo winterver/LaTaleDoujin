@@ -43,7 +43,7 @@ protected:
         mDebugBatch->PutHollowRect(ground3->Position, ground3->Size);
         mDebugBatch->UpdateScene();
 
-        ThrowIfFailed(CreateWICTextureFromFile(Device(), nullptr, _T("../Resource/IRIS.PNG"), nullptr, &mIrisTexture));
+        ThrowIfFailed(CreateWICTextureFromFile(Device(), nullptr, _T("Resource/IRIS.PNG"), nullptr, &mIrisTexture));
     }
 
     void UpdateScene() override
