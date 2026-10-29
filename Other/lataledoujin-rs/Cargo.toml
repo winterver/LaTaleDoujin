@@ -1,0 +1,10 @@
+[package]
+name = "lataledoujin-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+windows-core = "0.100.0"
+
+[build-dependencies]
+windows-bindgen = "0.100.0"
